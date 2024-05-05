@@ -24,6 +24,7 @@ function CharacterScreen() {
         <View style={styles.options}>
           <TouchableOpacity
             onPress={() => setCharacter(true)}
+            activeOpacity={0.8}
             style={{
               ...styles.checkCard,
               backgroundColor: character ? "#f4f4f4" : "transparent",
@@ -43,6 +44,7 @@ function CharacterScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setCharacter(false)}
+            activeOpacity={0.8}
             style={{
               ...styles.checkCard,
               backgroundColor: !character ? "#f4f4f4" : "transparent",
@@ -59,7 +61,11 @@ function CharacterScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={onSubmitCharacter} style={styles.btnSave}>
+        <TouchableOpacity
+          onPress={onSubmitCharacter}
+          activeOpacity={0.8}
+          style={styles.btnSave}
+        >
           <Text style={styles.btnTxt}>저장</Text>
         </TouchableOpacity>
       </View>
