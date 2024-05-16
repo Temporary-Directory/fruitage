@@ -20,7 +20,7 @@ public class Category {
     private String categoryName;
 
     @Column(name="category_color")
-    private int categoryColor;
+    private String categoryColor;
 
     @Column(name="category_is_deleted")
     private boolean categoryIsDeleted;
