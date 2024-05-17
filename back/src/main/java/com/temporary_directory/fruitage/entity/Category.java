@@ -2,12 +2,14 @@ package com.temporary_directory.fruitage.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Category {
@@ -22,7 +24,7 @@ public class Category {
     @Column(name="category_color")
     private String categoryColor;
 
-    @Column(name="category_is_deleted")
+    @Column(name="category_is_deleted", columnDefinition = "TINYINT(1)")
     private boolean categoryIsDeleted;
 
     @ManyToOne(fetch=FetchType.LAZY)

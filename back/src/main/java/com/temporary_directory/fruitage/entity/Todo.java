@@ -23,7 +23,7 @@ public class Todo {
     @Column(name="todo_content")
     private String todoContent;
 
-    @Column(name="todo_complete")
+    @Column(name="todo_complete", columnDefinition = "TINYINT(1)")
     private boolean todoComplete;
 
     @ManyToOne(fetch=FetchType.LAZY)

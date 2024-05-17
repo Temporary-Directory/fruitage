@@ -16,7 +16,7 @@ public class UserFruit {
     @Column(name="user_fruit_id")
     private int userFruitId;
 
-    @Column(name="fruit_is_selected")
+    @Column(name="fruit_is_selected" , columnDefinition = "TINYINT(1)")
     private boolean fruitIsSelected;
 
     @ManyToOne(fetch = FetchType.LAZY)

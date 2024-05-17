@@ -1,10 +1,14 @@
 package com.temporary_directory.fruitage.service;
 
+import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
 import com.temporary_directory.fruitage.entity.Category;
 import com.temporary_directory.fruitage.entity.User;
 import com.temporary_directory.fruitage.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,5 +23,10 @@ public class CalendarServiceImpl implements CalendarService{
                 .user(user)
                 .build();
         categoryRepository.save(category);
+    }
+
+    @Override
+    public List<CategoryResponseDTO> getCategory(User user) {
+        return categoryRepository.findByUserAndCategoryIsDeleted(user, false).stream().map(CategoryResponseDTO::toDto).collect(Collectors.toList());
     }
 }
