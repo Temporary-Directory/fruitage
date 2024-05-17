@@ -79,18 +79,7 @@ function CalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        {/* <TouchableOpacity onPress={onClose} activeOpacity={0.5}>
-          <AntDesign name="close" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onPressEdit} activeOpacity={0.5}>
-          <MaterialIcons
-            name={edit ? "save" : "edit"}
-            size={24}
-            color="black"
-          />
-        </TouchableOpacity> */}
-      </View>
+      <View style={styles.header}></View>
       <View style={styles.body}>
         <Calendar
           mode={mode}
@@ -111,12 +100,12 @@ function CalendarScreen() {
           </Text>
           <ScrollView
             showsVerticalScrollIndicator={false}
-            // style={{ marginBottom: 50 }}
+            style={{ marginBottom: 4 }}
           >
             {mode
               ? Object.keys(formattedTodos).map((cat, i) => {
                   return (
-                    <View style={styles.todo}>
+                    <View key={i} style={styles.todo}>
                       <View
                         style={{
                           ...styles.todoCategory,
@@ -131,6 +120,7 @@ function CalendarScreen() {
                         {formattedTodos[cat].map((todo, i) => {
                           return (
                             <TouchableOpacity
+                              key={i}
                               style={styles.todoLeft}
                               activeOpacity={0.8}
                             >
@@ -186,7 +176,7 @@ function CalendarScreen() {
               alignItems: "center",
               alignContent: "center",
               position: "absolute",
-              bottom: 96,
+              bottom: 16,
               right: 30,
 
               // shadow
