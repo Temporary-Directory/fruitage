@@ -34,4 +34,11 @@ public class Todo {
     @JoinColumn(name="category_id")
     private Category category;
 
+    public void updateTodoComplete() {
+        if(this.todoComplete == true){
+            this.todoComplete=false;
+        }else{
+            this.todoComplete=true;
+        }
+    }
 }

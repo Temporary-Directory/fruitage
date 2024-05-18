@@ -59,4 +59,10 @@ public class CalendarServiceImpl implements CalendarService{
                 .build();
         todoRepository.save(todo);
     }
+
+    @Override
+    public void completeTodo(int todoId) {
+        Todo todo= todoRepository.findById(todoId).orElseThrow(()->new IllegalArgumentException("no todo"));
+        todo.updateTodoComplete();
+    }
 }

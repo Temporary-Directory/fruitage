@@ -49,4 +49,10 @@ public class CalendarController {
     public void createTodo(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody TodoRequestDTO todoRequestDTO){
         calendarService.createTodo(principalDetails.getUser(), todoRequestDTO.getTodoDate(), todoRequestDTO.getTodoContent(), todoRequestDTO.getCategoryId());
     }
+
+    @PutMapping("/todo/{todoId}")
+    @ResponseStatus(code = HttpStatus.OK)
+    public void completeTodo(@PathVariable("todoId") int todoId){
+        calendarService.completeTodo(todoId);
+    }
 }

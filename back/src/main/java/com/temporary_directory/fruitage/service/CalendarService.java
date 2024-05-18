@@ -12,4 +12,5 @@ public interface CalendarService {
     void deleteCategory(int categoryId);
     void updateCategory(int categoryId, String categoryName, String categoryColor);
     void createTodo(User user, LocalDate todoDate, String todoContent, int categoryId);
+    void completeTodo(int todoId);
 }
