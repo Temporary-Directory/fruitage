@@ -64,4 +64,10 @@ public class CalendarController {
     public List<TodoResponseDTO> getTodo(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam(value="date") @DateTimeFormat(pattern = "yyyy-MM-dd")LocalDate date){
         return calendarService.getTodo(principalDetails.getUser(), date);
     }
+
+    @PutMapping("/todo")
+    @ResponseStatus(code= HttpStatus.OK)
+    public void updateTodo(@RequestBody TodoRequestDTO todoRequestDTO){
+        calendarService.updateTodo(todoRequestDTO.getTodoId(), todoRequestDTO.getTodoDate(), todoRequestDTO.getTodoContent(), todoRequestDTO.getCategoryId());
+    }
 }

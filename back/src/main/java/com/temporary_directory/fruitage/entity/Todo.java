@@ -43,4 +43,10 @@ public class Todo {
             this.todoComplete=true;
         }
     }
+
+    public void updateTodo(LocalDate date, String content, Category category){
+        this.todoDate=date;
+        this.todoContent=content;
+        this.category=category;
+    }
 }

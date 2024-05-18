@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TodoRequestDTO {
+    private int todoId;
     private LocalDate todoDate;
     private String todoContent;
     private int categoryId;

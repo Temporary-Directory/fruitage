@@ -71,4 +71,11 @@ public class CalendarServiceImpl implements CalendarService{
     public List<TodoResponseDTO> getTodo(User user, LocalDate date) {
         return todoRepository.findByUserAndTodoDate(user, date).stream().map(TodoResponseDTO::toDto).collect(Collectors.toList());
     }
+
+    @Override
+    public void updateTodo(int todoId, LocalDate todoDate, String todoContent, int categoryId) {
+        Todo todo= todoRepository.findById(todoId).orElseThrow(()->new IllegalArgumentException("no todo"));
+        Category category=categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
+        todo.updateTodo(todoDate, todoContent, category);
+    }
 }
