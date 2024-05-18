@@ -2,12 +2,15 @@ package com.temporary_directory.fruitage.service;
 
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
 import com.temporary_directory.fruitage.entity.Category;
+import com.temporary_directory.fruitage.entity.Todo;
 import com.temporary_directory.fruitage.entity.User;
 import com.temporary_directory.fruitage.repository.CategoryRepository;
+import com.temporary_directory.fruitage.repository.TodoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,9 +19,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CalendarServiceImpl implements CalendarService{
     private final CategoryRepository categoryRepository;
+    private final TodoRepository todoRepository;
 
     @Override
-    public void setCategory(User user, String categoryName, String categoryColor) {
+    public void createCategory(User user, String categoryName, String categoryColor) {
         Category category=Category.builder()
                 .categoryName(categoryName)
                 .categoryColor(categoryColor)
@@ -42,5 +46,17 @@ public class CalendarServiceImpl implements CalendarService{
     public void updateCategory(int categoryId, String categoryName, String categoryColor) {
         Category category=categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
         category.updateCategory(categoryName, categoryColor);
+    }
+
+    @Override
+    public void createTodo(User user, LocalDate todoDate, String todoContent, int categoryId) {
+        Category category=categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
+        Todo todo= Todo.builder()
+                .todoDate(todoDate)
+                .todoContent(todoContent)
+                .category(category)
+                .user(user)
+                .build();
+        todoRepository.save(todo);
     }
 }

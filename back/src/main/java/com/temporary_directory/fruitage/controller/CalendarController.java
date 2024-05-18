@@ -2,6 +2,7 @@ package com.temporary_directory.fruitage.controller;
 
 import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CategoryRequestDTO;
+import com.temporary_directory.fruitage.dto.request.TodoRequestDTO;
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
 import com.temporary_directory.fruitage.service.CalendarService;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,10 @@ public class CalendarController {
     private final CalendarService calendarService;
 
     //category
-
     @PostMapping("/category")
     @ResponseStatus(code = HttpStatus.OK)
-    public void setCategory(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CategoryRequestDTO categoryRequestDTO){
-        calendarService.setCategory(principalDetails.getUser(), categoryRequestDTO.getCategoryName(), categoryRequestDTO.getCategoryColor());
+    public void createCategory(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CategoryRequestDTO categoryRequestDTO){
+        calendarService.createCategory(principalDetails.getUser(), categoryRequestDTO.getCategoryName(), categoryRequestDTO.getCategoryColor());
     }
 
     @GetMapping("/category")
@@ -41,5 +41,12 @@ public class CalendarController {
     @ResponseStatus(code = HttpStatus.OK)
     public void updateCategory(@RequestBody CategoryRequestDTO categoryRequestDTO){
         calendarService.updateCategory(categoryRequestDTO.getCategoryId(), categoryRequestDTO.getCategoryName(), categoryRequestDTO.getCategoryColor());
+    }
+
+    // to do
+    @PostMapping("/todo")
+    @ResponseStatus(code = HttpStatus.OK)
+    public void createTodo(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody TodoRequestDTO todoRequestDTO){
+        calendarService.createTodo(principalDetails.getUser(), todoRequestDTO.getTodoDate(), todoRequestDTO.getTodoContent(), todoRequestDTO.getCategoryId());
     }
 }
