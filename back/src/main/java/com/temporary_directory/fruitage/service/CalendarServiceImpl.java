@@ -78,4 +78,9 @@ public class CalendarServiceImpl implements CalendarService{
         Category category=categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
         todo.updateTodo(todoDate, todoContent, category);
     }
+
+    @Override
+    public void deleteTodo(int todoId) {
+        todoRepository.deleteById(todoId);
+    }
 }

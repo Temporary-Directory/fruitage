@@ -16,4 +16,5 @@ public interface CalendarService {
     void completeTodo(int todoId);
     List<TodoResponseDTO> getTodo(User user, LocalDate date);
     void updateTodo(int todoId, LocalDate todoDate, String todoContent, int categoryId);
+    void deleteTodo(int todoId);
 }

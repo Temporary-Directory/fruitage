@@ -70,4 +70,10 @@ public class CalendarController {
     public void updateTodo(@RequestBody TodoRequestDTO todoRequestDTO){
         calendarService.updateTodo(todoRequestDTO.getTodoId(), todoRequestDTO.getTodoDate(), todoRequestDTO.getTodoContent(), todoRequestDTO.getCategoryId());
     }
+
+    @DeleteMapping("/todo/{todoId}")
+    @ResponseStatus(code= HttpStatus.OK)
+    public void deleteTodo(@PathVariable("todoId") int todoId){
+        calendarService.deleteTodo(todoId);
+    }
 }
