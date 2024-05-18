@@ -30,4 +30,10 @@ public class CalendarController {
     public List<CategoryResponseDTO> getCategory(@AuthenticationPrincipal PrincipalDetails principalDetails){
         return calendarService.getCategory(principalDetails.getUser());
     }
+
+    @DeleteMapping("/category/{categoryId}")
+    @ResponseStatus(code = HttpStatus.OK)
+    public void deleteCategory(@PathVariable("categoryId") int categoryId){
+        calendarService.deleteCategory(categoryId);
+    }
 }

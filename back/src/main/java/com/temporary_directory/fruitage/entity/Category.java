@@ -31,4 +31,7 @@ public class Category {
     @JoinColumn(name="user_id")
     private User user;
 
+    public void deleteCategory(){
+        this.categoryIsDeleted=true;
+    }
 }

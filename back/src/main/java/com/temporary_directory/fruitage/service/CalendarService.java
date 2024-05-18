@@ -8,4 +8,5 @@ import java.util.List;
 public interface CalendarService {
     void setCategory(User user, String categoryName, String categoryColor);
     List<CategoryResponseDTO> getCategory(User user);
+    void deleteCategory(int categoryId);
 }
