@@ -34,4 +34,8 @@ public class Category {
     public void deleteCategory(){
         this.categoryIsDeleted=true;
     }
+    public void updateCategory(String categoryName, String categoryColor) {
+        this.categoryName=categoryName;
+        this.categoryColor=categoryColor;
+    }
 }

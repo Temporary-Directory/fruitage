@@ -9,4 +9,5 @@ public interface CalendarService {
     void setCategory(User user, String categoryName, String categoryColor);
     List<CategoryResponseDTO> getCategory(User user);
     void deleteCategory(int categoryId);
+    void updateCategory(int categoryId, String categoryName, String categoryColor);
 }

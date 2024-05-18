@@ -34,7 +34,13 @@ public class CalendarServiceImpl implements CalendarService{
 
     @Override
     public void deleteCategory(int categoryId) {
-        Category category= categoryRepository.findById(categoryId).orElseThrow();
+        Category category= categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
         category.deleteCategory();
+    }
+
+    @Override
+    public void updateCategory(int categoryId, String categoryName, String categoryColor) {
+        Category category=categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
+        category.updateCategory(categoryName, categoryColor);
     }
 }

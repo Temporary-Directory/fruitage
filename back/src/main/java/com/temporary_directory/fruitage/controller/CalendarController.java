@@ -36,4 +36,10 @@ public class CalendarController {
     public void deleteCategory(@PathVariable("categoryId") int categoryId){
         calendarService.deleteCategory(categoryId);
     }
+
+    @PutMapping("/category")
+    @ResponseStatus(code = HttpStatus.OK)
+    public void updateCategory(@RequestBody CategoryRequestDTO categoryRequestDTO){
+        calendarService.updateCategory(categoryRequestDTO.getCategoryId(), categoryRequestDTO.getCategoryName(), categoryRequestDTO.getCategoryColor());
+    }
 }
