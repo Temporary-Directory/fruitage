@@ -4,12 +4,15 @@ import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CategoryRequestDTO;
 import com.temporary_directory.fruitage.dto.request.TodoRequestDTO;
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
+import com.temporary_directory.fruitage.dto.response.TodoResponseDTO;
 import com.temporary_directory.fruitage.service.CalendarService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -54,5 +57,11 @@ public class CalendarController {
     @ResponseStatus(code = HttpStatus.OK)
     public void completeTodo(@PathVariable("todoId") int todoId){
         calendarService.completeTodo(todoId);
+    }
+
+    @GetMapping("/todo")
+    @ResponseStatus(code = HttpStatus.OK)
+    public List<TodoResponseDTO> getTodo(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam(value="date") @DateTimeFormat(pattern = "yyyy-MM-dd")LocalDate date){
+        return calendarService.getTodo(principalDetails.getUser(), date);
     }
 }

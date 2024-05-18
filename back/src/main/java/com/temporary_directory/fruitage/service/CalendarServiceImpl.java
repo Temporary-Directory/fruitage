@@ -1,6 +1,7 @@
 package com.temporary_directory.fruitage.service;
 
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
+import com.temporary_directory.fruitage.dto.response.TodoResponseDTO;
 import com.temporary_directory.fruitage.entity.Category;
 import com.temporary_directory.fruitage.entity.Todo;
 import com.temporary_directory.fruitage.entity.User;
@@ -64,5 +65,10 @@ public class CalendarServiceImpl implements CalendarService{
     public void completeTodo(int todoId) {
         Todo todo= todoRepository.findById(todoId).orElseThrow(()->new IllegalArgumentException("no todo"));
         todo.updateTodoComplete();
+    }
+
+    @Override
+    public List<TodoResponseDTO> getTodo(User user, LocalDate date) {
+        return todoRepository.findByUserAndTodoDate(user, date).stream().map(TodoResponseDTO::toDto).collect(Collectors.toList());
     }
 }
