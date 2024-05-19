@@ -1,17 +1,25 @@
 import {
   View,
-  Image,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5, AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 
 import Calendar from "../../components/Calendar";
+// import BottomSheet from "../../components/BottomSheet";
+import TodoBottomSheet from "../../components/TodoBottomSheet";
 
 function CalendarScreen() {
+  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const [bottomSheetEditVisible, setBottomSheetEditVisible] = useState(false);
+
+  const onCloseBottomSheet = () => {
+    console.log("BottomSheet Closed!");
+  };
+
   const [mode, setMode] = useState(false); // false: commit mode, true: todo mode
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -93,7 +101,7 @@ function CalendarScreen() {
               fontWeight: 800,
               fontSize: 16,
               textAlign: "left",
-              marginBottom: 8,
+              marginBottom: 6,
             }}
           >
             {mode ? "Todos" : "Commits"}
@@ -119,20 +127,30 @@ function CalendarScreen() {
                       <View stlye={styles.todoList}>
                         {formattedTodos[cat].map((todo, i) => {
                           return (
-                            <TouchableOpacity
-                              key={i}
-                              style={styles.todoLeft}
-                              activeOpacity={0.8}
-                            >
-                              <FontAwesome
-                                name={todo.done ? "check-square" : "square"}
-                                size={14}
-                                color={todo.done ? "#B66FFF" : "#efefef"}
-                              />
-                              <Text style={styles.todoContentTxt}>
-                                {todo.content}
-                              </Text>
-                            </TouchableOpacity>
+                            <View key={i} style={styles.todoLeft}>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  console.log("TODO: check vs. unchecked");
+                                }}
+                                activeOpacity={0.7}
+                              >
+                                <FontAwesome
+                                  name={todo.done ? "check-square" : "square"}
+                                  size={15}
+                                  color={todo.done ? "#B66FFF" : "#efefef"}
+                                />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setBottomSheetEditVisible(true);
+                                }}
+                                activeOpacity={0.8}
+                              >
+                                <Text style={styles.todoContentTxt}>
+                                  {todo.content}
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
                           );
                         })}
                       </View>
@@ -165,7 +183,7 @@ function CalendarScreen() {
         {mode ? (
           <TouchableOpacity
             onPress={() => {
-              console.log("Let's create new todo!");
+              setBottomSheetVisible(true);
             }}
             style={{
               width: 60,
@@ -194,6 +212,22 @@ function CalendarScreen() {
           </TouchableOpacity>
         ) : null}
       </View>
+      <TodoBottomSheet
+        visible={bottomSheetVisible}
+        setVisible={setBottomSheetVisible}
+        create={true}
+        onClose={onCloseBottomSheet}
+        date={selectedDate}
+      />
+      <TodoBottomSheet
+        visible={bottomSheetEditVisible}
+        setVisible={setBottomSheetEditVisible}
+        create={false}
+        onClose={() => {
+          console.log("Delete todo button pressed");
+        }}
+        date={selectedDate}
+      />
     </View>
   );
 }
@@ -260,7 +294,7 @@ const styles = StyleSheet.create({
     color: "#ababab",
   },
   todo: {
-    marginVertical: 8,
+    marginVertical: 6,
   },
   todoCategory: {
     width: 66,
@@ -272,15 +306,16 @@ const styles = StyleSheet.create({
   },
   todoCategoryTxt: {
     fontSize: 9,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   todoLeft: {
     flexDirection: "row",
+    alignItems: "center",
     marginTop: 8,
     marginLeft: 10,
   },
   todoContentTxt: {
-    fontSize: 10,
+    fontSize: 11,
     marginLeft: 18,
   },
 });
