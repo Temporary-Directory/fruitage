@@ -10,7 +10,10 @@ import com.temporary_directory.fruitage.repository.UserAvatarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
     private final UserAvatarRepository userAvatarRepository;
@@ -27,5 +30,12 @@ public class UserServiceImpl implements UserService{
                 .avatar(avatar)
                 .build();
         userAvatarRepository.save(userAvatar);
+    }
+
+    @Override
+    public void updateCharacter(User user, int characterType) {
+        UserAvatar userAvatar=userAvatarRepository.findByUser(user);
+        Avatar avatar=avatarRepository.findById(characterType).orElseThrow(()->new IllegalArgumentException("no avatar"));
+        userAvatar.updateAvatar(avatar);
     }
 }

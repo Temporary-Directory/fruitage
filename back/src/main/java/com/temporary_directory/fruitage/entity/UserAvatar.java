@@ -31,4 +31,7 @@ public class UserAvatar {
     @JoinColumn(name="avatar_id")
     private Avatar avatar;
 
+    public void updateAvatar(Avatar avatar){
+        this.avatar=avatar;
+    }
 }

@@ -20,4 +20,10 @@ public class UserController {
     public void createCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CharacterRequestDTO characterRequestDTO){
         userService.createCharacter(principalDetails.getUser(), characterRequestDTO.getCharacterType());
     }
+
+    @PutMapping("/character")
+    @ResponseStatus(code = HttpStatus.OK)
+    public void updateCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CharacterRequestDTO characterRequestDTO){
+        userService.updateCharacter(principalDetails.getUser(), characterRequestDTO.getCharacterType());
+    }
 }
