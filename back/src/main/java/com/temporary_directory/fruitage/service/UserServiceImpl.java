@@ -1,5 +1,6 @@
 package com.temporary_directory.fruitage.service;
 
+import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
 import com.temporary_directory.fruitage.entity.*;
 import com.temporary_directory.fruitage.repository.AvatarRepository;
 import com.temporary_directory.fruitage.repository.FruitRepository;
@@ -38,6 +39,11 @@ public class UserServiceImpl implements UserService{
         UserAvatar userAvatar=userAvatarRepository.findByUser(user);
         Avatar avatar=avatarRepository.findById(characterType).orElseThrow(()->new IllegalArgumentException("no avatar"));
         userAvatar.updateAvatar(avatar);
+    }
+
+    @Override
+    public FruitResponseDTO getFruitCount(User user) {
+        return new FruitResponseDTO(userFruitRepository.countByUser(user));
     }
 
     public void createFruit(User user, Fruit fruit) {

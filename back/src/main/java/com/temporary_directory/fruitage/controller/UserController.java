@@ -2,6 +2,7 @@ package com.temporary_directory.fruitage.controller;
 
 import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CharacterRequestDTO;
+import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
 import com.temporary_directory.fruitage.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,5 +26,11 @@ public class UserController {
     @ResponseStatus(code = HttpStatus.OK)
     public void updateCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CharacterRequestDTO characterRequestDTO){
         userService.updateCharacter(principalDetails.getUser(), characterRequestDTO.getCharacterType());
+    }
+
+    @GetMapping("/fruit")
+    @ResponseStatus(code = HttpStatus.OK)
+    public FruitResponseDTO getFruitCount(@AuthenticationPrincipal PrincipalDetails principalDetails){
+        return userService.getFruitCount(principalDetails.getUser());
     }
 }
