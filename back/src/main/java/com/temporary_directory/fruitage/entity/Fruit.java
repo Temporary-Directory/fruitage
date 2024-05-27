@@ -1,9 +1,12 @@
 package com.temporary_directory.fruitage.entity;
 
 
+import lombok.Getter;
+
 import javax.persistence.*;
 
 @Entity
+@Getter
 public class Fruit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

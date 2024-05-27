@@ -3,6 +3,7 @@ package com.temporary_directory.fruitage.controller;
 import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CharacterRequestDTO;
 import com.temporary_directory.fruitage.dto.request.FruitRequestDTO;
+import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
 import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
 import com.temporary_directory.fruitage.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -10,13 +11,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
 
-    //character
+    // character
     @PostMapping("/character")
     @ResponseStatus(code= HttpStatus.OK)
     public void createCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CharacterRequestDTO characterRequestDTO){
@@ -29,6 +32,7 @@ public class UserController {
         userService.updateCharacter(principalDetails.getUser(), characterRequestDTO.getCharacterType());
     }
 
+    // fruit
     @GetMapping("/fruit")
     @ResponseStatus(code = HttpStatus.OK)
     public FruitResponseDTO getFruitCount(@AuthenticationPrincipal PrincipalDetails principalDetails){
@@ -40,4 +44,11 @@ public class UserController {
     public void selectFruit(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody FruitRequestDTO fruitRequestDTO){
         userService.selectFruit(principalDetails.getUser(), fruitRequestDTO.getFruitIdList());
     }
+
+    @GetMapping("/fruit/info")
+    @ResponseStatus(code = HttpStatus.OK)
+    public List<FruitInfoResponseDTO> getFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails){
+        return userService.getFruitInfo(principalDetails.getUser());
+    }
+
 }

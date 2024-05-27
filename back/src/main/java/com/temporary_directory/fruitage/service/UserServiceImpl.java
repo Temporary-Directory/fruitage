@@ -1,5 +1,6 @@
 package com.temporary_directory.fruitage.service;
 
+import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
 import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
 import com.temporary_directory.fruitage.entity.*;
 import com.temporary_directory.fruitage.repository.AvatarRepository;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -54,6 +57,11 @@ public class UserServiceImpl implements UserService{
             UserFruit userFruit = userFruitRepository.findByUserAndFruit(user, fruit);
             userFruit.selectFruit();
         }
+    }
+
+    @Override
+    public List<FruitInfoResponseDTO> getFruitInfo(User user) {
+        return userFruitRepository.findByUser(user).stream().map(FruitInfoResponseDTO::toDto).collect(Collectors.toList());
     }
 
     public void createFruit(User user, Fruit fruit) {
