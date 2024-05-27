@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 
 @Service
 @Transactional
@@ -44,6 +45,15 @@ public class UserServiceImpl implements UserService{
     @Override
     public FruitResponseDTO getFruitCount(User user) {
         return new FruitResponseDTO(userFruitRepository.countByUser(user));
+    }
+
+    @Override
+    public void selectFruit(User user, ArrayList<Integer> fruitList) {
+        for(int num: fruitList){
+            Fruit fruit=fruitRepository.findById(num).orElseThrow(()->new IllegalArgumentException("no fruit"));
+            UserFruit userFruit = userFruitRepository.findByUserAndFruit(user, fruit);
+            userFruit.selectFruit();
+        }
     }
 
     public void createFruit(User user, Fruit fruit) {

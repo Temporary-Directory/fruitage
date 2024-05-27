@@ -2,6 +2,7 @@ package com.temporary_directory.fruitage.controller;
 
 import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CharacterRequestDTO;
+import com.temporary_directory.fruitage.dto.request.FruitRequestDTO;
 import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
 import com.temporary_directory.fruitage.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,11 @@ public class UserController {
     @ResponseStatus(code = HttpStatus.OK)
     public FruitResponseDTO getFruitCount(@AuthenticationPrincipal PrincipalDetails principalDetails){
         return userService.getFruitCount(principalDetails.getUser());
+    }
+
+    @PostMapping("/fruit")
+    @ResponseStatus(code = HttpStatus.OK)
+    public void selectFruit(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody FruitRequestDTO fruitRequestDTO){
+        userService.selectFruit(principalDetails.getUser(), fruitRequestDTO.getFruitIdList());
     }
 }

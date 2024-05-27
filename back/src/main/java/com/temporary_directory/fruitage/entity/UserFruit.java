@@ -27,4 +27,8 @@ public class UserFruit {
     @JoinColumn(name="fruit_id")
     private Fruit fruit;
 
+    public void selectFruit(){
+        this.fruitIsSelected = !this.fruitIsSelected;
+    }
+
 }
