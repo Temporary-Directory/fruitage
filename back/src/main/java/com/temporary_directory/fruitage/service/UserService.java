@@ -1,6 +1,7 @@
 package com.temporary_directory.fruitage.service;
 
 import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
+import com.temporary_directory.fruitage.dto.response.UserFruitInfoResponseDTO;
 import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
 import com.temporary_directory.fruitage.entity.User;
 
@@ -12,5 +13,6 @@ public interface UserService {
     void updateCharacter(User user, int characterType);
     FruitResponseDTO getFruitCount(User user);
     void selectFruit(User user, ArrayList<Integer> fruitList);
-    List<FruitInfoResponseDTO> getFruitInfo(User user);
+    List<UserFruitInfoResponseDTO> getFruitInfo(User user);
+    List<FruitInfoResponseDTO> getNewFruitInfo(User user, int fruitId);
 }

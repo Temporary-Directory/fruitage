@@ -4,6 +4,7 @@ import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CharacterRequestDTO;
 import com.temporary_directory.fruitage.dto.request.FruitRequestDTO;
 import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
+import com.temporary_directory.fruitage.dto.response.UserFruitInfoResponseDTO;
 import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
 import com.temporary_directory.fruitage.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +48,14 @@ public class UserController {
 
     @GetMapping("/fruit/info")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<FruitInfoResponseDTO> getFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails){
+    public List<UserFruitInfoResponseDTO> getFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails){
         return userService.getFruitInfo(principalDetails.getUser());
+    }
+
+    @GetMapping("/fruit/{fruitId}")
+    @ResponseStatus(code = HttpStatus.OK)
+    public List<FruitInfoResponseDTO> getNewFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable("fruitId") int fruitId){
+        return userService.getNewFruitInfo(principalDetails.getUser(), fruitId);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.temporary_directory.fruitage.service;
 
 import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
+import com.temporary_directory.fruitage.dto.response.UserFruitInfoResponseDTO;
 import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
 import com.temporary_directory.fruitage.entity.*;
 import com.temporary_directory.fruitage.repository.AvatarRepository;
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService{
                 .build();
         userAvatarRepository.save(userAvatar);
 
-        createFruit(user, fruit);
+        createFruit(user, fruit, true);
     }
 
     @Override
@@ -60,15 +61,33 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<FruitInfoResponseDTO> getFruitInfo(User user) {
-        return userFruitRepository.findByUser(user).stream().map(FruitInfoResponseDTO::toDto).collect(Collectors.toList());
+    public List<UserFruitInfoResponseDTO> getFruitInfo(User user) {
+        return userFruitRepository.findByUser(user).stream().map(UserFruitInfoResponseDTO::toDto).collect(Collectors.toList());
     }
 
-    public void createFruit(User user, Fruit fruit) {
+    @Override
+    public List<FruitInfoResponseDTO> getNewFruitInfo(User user, int fruitId) {
+        UserAvatar userAvatar=userAvatarRepository.findByUser(user);
+
+        List<FruitInfoResponseDTO> fruitInfoResponseDTOList =new ArrayList<>();
+
+        Fruit fruit=null;
+        for(int i=userAvatar.getFruit().getFruitId()+1; i<=fruitId; i++){
+            fruit=fruitRepository.findById(i).orElseThrow(()->new IllegalArgumentException("no fruit"));
+            fruitInfoResponseDTOList.add(FruitInfoResponseDTO.toDto(fruit));
+
+            createFruit(user, fruit, false);
+        }
+        userAvatar.updateFruit(fruit);
+
+        return fruitInfoResponseDTOList;
+    }
+
+    public void createFruit(User user, Fruit fruit, boolean flag) {
         UserFruit userFruit=UserFruit.builder()
                 .user(user)
                 .fruit(fruit)
-                .fruitIsSelected(true)
+                .fruitIsSelected(flag)
                 .build();
         userFruitRepository.save(userFruit);
     }
