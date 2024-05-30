@@ -2,12 +2,14 @@ package com.temporary_directory.fruitage.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserAvatar {
@@ -34,4 +36,5 @@ public class UserAvatar {
     public void updateAvatar(Avatar avatar){
         this.avatar=avatar;
     }
+    public void updateFruit(Fruit fruit) {this.fruit = fruit; }
 }
