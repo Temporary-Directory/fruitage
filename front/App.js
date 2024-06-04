@@ -80,9 +80,6 @@ function TabBar({ state, descriptors, navigation }) {
               paddingTop: 10,
             }}
           >
-            {/* <Text style={{ color: isFocused ? "#673ab7" : "#222" }}>
-              {label}
-            </Text> */}
             {label === "Main" ? (
               <Image
                 style={{ width: 44, height: 44 }}
@@ -116,6 +113,7 @@ export default function App() {
   <DictionaryScreen />
   <CalendarScreen /> */
   }
+
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -124,6 +122,7 @@ export default function App() {
           tabBarActiveTintColor: "red",
         }}
         tabBar={(props) => <TabBar {...props} />}
+        initialRouteName="Main"
       >
         <Tab.Screen name="Calendar" component={CalendarScreen} />
         <Tab.Screen name="Main" component={MainScreen} />
