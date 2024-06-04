@@ -3,6 +3,7 @@ import {
   View,
   StyleSheet,
   Text,
+  Image,
   Modal,
   Animated,
   TouchableWithoutFeedback,
@@ -12,8 +13,15 @@ import {
   PanResponder,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
+import CategoryBottomSheet from "../CategoryBottomSheet";
+import Close3 from "../../assets/images/ic_close_333.png";
+import Trash3 from "../../assets/images/ic_trash_333.png";
 
 const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
+  const [categoryBottomSheetVisible, setCategoryBottomSheetVisible] =
+    useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
   const screenHeight = Dimensions.get("screen").height;
   const panY = useRef(new Animated.Value(screenHeight)).current;
   const translateY = panY.interpolate({
@@ -88,11 +96,10 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
               style={{ position: "absolute", top: 28, right: 35, zIndex: 1 }}
               activeOpacity={0.5}
             >
-              {create ? (
-                <AntDesign name="close" size={24} color="black" />
-              ) : (
-                <Ionicons name="trash" size={24} color="black" />
-              )}
+              <Image
+                style={{ width: 22, height: 22 }}
+                source={create ? Close3 : Trash3}
+              />
             </TouchableOpacity>
             <View
               style={{
@@ -146,6 +153,7 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
                 }}
               >
                 <TouchableOpacity
+                  onPress={() => setCategoryBottomSheetVisible(true)}
                   style={{
                     width: 80,
                     paddingVertical: 4.5,
@@ -153,15 +161,29 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
                     justifyContent: "center",
                     alignItems: "center",
                     borderRadius: 6,
-                    backgroundColor: "#f4f4f4",
+                    backgroundColor:
+                      selectedCategory === null
+                        ? "#f4f4f4"
+                        : selectedCategory.categoryColor,
                   }}
                   activeOpacity={0.8}
                 >
-                  <Text style={{ fontSize: 12, color: "#aaa" }}>없음</Text>
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      color: selectedCategory === null ? "#aaa" : "black",
+                    }}
+                  >
+                    {selectedCategory === null
+                      ? "없음"
+                      : selectedCategory.categoryName}
+                  </Text>
                 </TouchableOpacity>
-                <Text style={{ fontSize: 12, color: "#FF5154" }}>
-                  * 카테고리를 선택해주세요.
-                </Text>
+                {selectedCategory === null ? (
+                  <Text style={{ fontSize: 12, color: "#FF5154" }}>
+                    * 카테고리를 선택해주세요.
+                  </Text>
+                ) : null}
               </View>
             </View>
             <View style={{ marginTop: 30, paddingHorizontal: 29 }}>
@@ -185,6 +207,12 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
           </View>
         </Animated.View>
       </View>
+
+      <CategoryBottomSheet
+        visible={categoryBottomSheetVisible}
+        setVisible={setCategoryBottomSheetVisible}
+        setSelected={setSelectedCategory}
+      />
     </Modal>
   );
 };
