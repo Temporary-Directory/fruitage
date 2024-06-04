@@ -1,12 +1,16 @@
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { FontAwesome, FontAwesome5, AntDesign } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useState } from "react";
+import Todo from "../../assets/icons/ic_todo.png";
+import TodoUn from "../../assets/icons/ic_todo-un.png";
+import Plus from "../../assets/images/ic_plus.png";
 
 import Calendar from "../../components/Calendar";
 // import BottomSheet from "../../components/BottomSheet";
@@ -134,11 +138,18 @@ function CalendarScreen() {
                                 }}
                                 activeOpacity={0.7}
                               >
-                                <FontAwesome
+                                <Image
+                                  style={{
+                                    width: 13,
+                                    height: 13,
+                                  }}
+                                  source={todo.done ? Todo : TodoUn}
+                                />
+                                {/* <FontAwesome
                                   name={todo.done ? "check-square" : "square"}
                                   size={15}
                                   color={todo.done ? "#B66FFF" : "#efefef"}
-                                />
+                                /> */}
                               </TouchableOpacity>
                               <TouchableOpacity
                                 onPress={() => {
@@ -161,7 +172,7 @@ function CalendarScreen() {
                   return (
                     <View key={i} style={styles.commit}>
                       <View style={styles.commitLeft}>
-                        <FontAwesome name="circle" size={10} color="#d9d9d9" />
+                        <View style={styles.circle}></View>
                         <View style={styles.commitRepository}>
                           <Text style={styles.commitRepositoryTxt}>
                             {commit.repository}
@@ -208,7 +219,8 @@ function CalendarScreen() {
             }}
             activeOpacity={0.8}
           >
-            <FontAwesome5 name="plus" size={36} color="white" />
+            {/* <FontAwesome5 name="plus" size={36} color="white" /> */}
+            <Image style={{ width: 36, height: 36 }} source={Plus} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -250,7 +262,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-end",
     paddingHorizontal: 20,
-    //     backgroundColor: "skyblue",
+    // backgroundColor: "skyblue",
   },
   body: {
     flex: 10,
@@ -269,10 +281,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginVertical: 8,
+    marginVertical: 5,
   },
   commitLeft: {
     flexDirection: "row",
+    alignItems: "center",
+  },
+  circle: {
+    width: 7,
+    height: 7,
+    backgroundColor: "#d9d9d9",
+    borderRadius: 90,
   },
   commitRepository: {
     width: 50,
@@ -281,6 +300,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: 22,
     marginRight: 12,
+    paddingVertical: 2,
     borderRadius: 4,
     backgroundColor: "#efefef",
   },

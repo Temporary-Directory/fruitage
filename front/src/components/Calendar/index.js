@@ -1,7 +1,10 @@
 import { View, Image, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+// import { FontAwesome6, AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 import ToggleSwitch from "../ToggleSwitch";
+import Blueberry from "../../assets/images/fruits/blueberry.png";
+import Left from "../../assets/images/ic_left.png";
+import Right from "../../assets/images/ic_right.png";
 
 const Calendar = ({ mode, setMode, selectedDate, setSelectedDate }) => {
   const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
@@ -139,14 +142,14 @@ const Calendar = ({ mode, setMode, selectedDate, setSelectedDate }) => {
                     : " "}
                 </Text>
               </View>
-              <AntDesign
-                name="apple1"
-                size={35}
-                color="#B66FFF"
+              <Image
                 style={{
                   ...styles.img,
                   opacity: date.getMonth() !== currentMonth.getMonth() ? 0 : 1,
+                  width: 38,
+                  height: 38,
                 }}
+                source={Blueberry} // 받아온 정보로 source만 변경
               />
             </TouchableOpacity>
           );
@@ -160,7 +163,14 @@ const Calendar = ({ mode, setMode, selectedDate, setSelectedDate }) => {
       <View style={styles.titleView}>
         <View style={styles.yearMonth}>
           <TouchableOpacity onPress={onPrev} activeOpacity={0.6}>
-            <AntDesign name="left" size={24} color="#D9D9D9" />
+            {/* <AntDesign name="left" size={24} color="#D9D9D9" /> */}
+            <Image
+              style={{
+                width: 24,
+                height: 24,
+              }}
+              source={Left}
+            />
           </TouchableOpacity>
           <Text style={styles.titleTxt}>
             {currentMonth.getFullYear()}.
@@ -169,7 +179,14 @@ const Calendar = ({ mode, setMode, selectedDate, setSelectedDate }) => {
               : currentMonth.getMonth() + 1}
           </Text>
           <TouchableOpacity onPress={onNext} activeOpacity={0.6}>
-            <AntDesign name="right" size={24} color="#D9D9D9" />
+            {/* <AntDesign name="right" size={24} color="#D9D9D9" /> */}
+            <Image
+              style={{
+                width: 24,
+                height: 24,
+              }}
+              source={Right}
+            />
           </TouchableOpacity>
         </View>
         <ToggleSwitch onToggle={() => setMode(!mode)} isOn={mode} />
@@ -178,9 +195,25 @@ const Calendar = ({ mode, setMode, selectedDate, setSelectedDate }) => {
         <View style={styles.weekDays}>
           {daysOfWeek.map((d, i) => {
             return (
-              <Text key={i} style={{ fontSize: 12, color: "#8e8e8e" }}>
-                {d}
-              </Text>
+              <View
+                key={i}
+                style={{
+                  width: 30,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: 0,
+                  padding: 0,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: "#8e8e8e",
+                  }}
+                >
+                  {d}
+                </Text>
+              </View>
             );
           })}
         </View>
@@ -198,9 +231,10 @@ export default Calendar;
 
 const styles = StyleSheet.create({
   calendar: {
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor: "skyblue",
+    //   backgroundColor: "skyblue",
   },
   titleView: {
     width: "100%",
@@ -226,7 +260,7 @@ const styles = StyleSheet.create({
   calendarBody: {
     width: "100%",
     marginVertical: 10,
-    // backgroundColor: "lavender",
+    // backgroundColor: "lime",
   },
   weekDays: {
     flexDirection: "row",
@@ -243,12 +277,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
+    // borderWidth: 1,
   },
   day: {
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 7,
-    //   backgroundColor: "#CAEC8F",
+    // backgroundColor: "#CAEC8F",
     // borderWidth: 1,
   },
   img: {
