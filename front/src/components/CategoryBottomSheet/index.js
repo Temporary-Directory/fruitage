@@ -13,9 +13,14 @@ import {
   ScrollView,
 } from "react-native";
 import SettingA from "../../assets/images/ic_setting_aaa.png";
+import CategorySettingBottomSheet from "../CategorySettingBottomSheet";
 
 const CategoryBottomSheet = ({ visible, setVisible, setSelected }) => {
   const [categories, setCategories] = useState([]);
+  const [
+    categorySettingBottomSheetVisible,
+    setCategorySettingBottomSheetVisible,
+  ] = useState(false);
 
   useEffect(() => {
     // TODO: [BE] GET /calendar/category
@@ -121,7 +126,7 @@ const CategoryBottomSheet = ({ visible, setVisible, setSelected }) => {
             }}
           >
             <TouchableOpacity
-              //   onPress={closeModal}
+              onPress={() => setCategorySettingBottomSheetVisible(true)}
               style={{ position: "absolute", top: 24, right: 35, zIndex: 1 }}
               activeOpacity={0.5}
             >
@@ -187,6 +192,11 @@ const CategoryBottomSheet = ({ visible, setVisible, setSelected }) => {
           </View>
         </Animated.View>
       </View>
+
+      <CategorySettingBottomSheet
+        visible={categorySettingBottomSheetVisible}
+        setVisible={setCategorySettingBottomSheetVisible}
+      />
     </Modal>
   );
 };
