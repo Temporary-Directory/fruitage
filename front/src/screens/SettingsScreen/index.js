@@ -92,6 +92,9 @@ function SettingScreen() {
                 }}
               >
                 <TouchableOpacity
+                  onPress={() => {
+                    console.log("Open CharacterSettingScreen");
+                  }}
                   style={{
                     paddingVertical: 4,
                     borderRadius: 5,
@@ -118,6 +121,9 @@ function SettingScreen() {
                 }}
               >
                 <TouchableOpacity
+                  onPress={() => {
+                    console.log("Open DictionaryScreen");
+                  }}
                   style={{
                     paddingVertical: 4,
                     borderRadius: 5,
