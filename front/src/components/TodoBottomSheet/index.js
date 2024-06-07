@@ -16,11 +16,14 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import CategoryBottomSheet from "../CategoryBottomSheet";
 import Close3 from "../../assets/images/ic_close_333.png";
 import Trash3 from "../../assets/images/ic_trash_333.png";
+import DeleteBottomSheet from "../DeleteBottomSheet";
 
 const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
   const [categoryBottomSheetVisible, setCategoryBottomSheetVisible] =
     useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [deleteBottomSheetVisible, setDeleteBottomSheetVisible] =
+    useState(false);
 
   const screenHeight = Dimensions.get("screen").height;
   const panY = useRef(new Animated.Value(screenHeight)).current;
@@ -92,7 +95,13 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
             style={{ width: "100%", paddingHorizontal: 35, paddingTop: 30 }}
           >
             <TouchableOpacity
-              onPress={create ? closeModal : onClose}
+              onPress={
+                create
+                  ? closeModal
+                  : () => {
+                      setDeleteBottomSheetVisible(true);
+                    }
+              }
               style={{ position: "absolute", top: 28, right: 35, zIndex: 1 }}
               activeOpacity={0.5}
             >
@@ -212,6 +221,12 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
         visible={categoryBottomSheetVisible}
         setVisible={setCategoryBottomSheetVisible}
         setSelected={setSelectedCategory}
+      />
+      <DeleteBottomSheet
+        visible={deleteBottomSheetVisible}
+        setVisible={setDeleteBottomSheetVisible}
+        text={"할 일을 삭제하시겠습니까?"}
+        func={() => console.log("delete todo")}
       />
     </Modal>
   );
