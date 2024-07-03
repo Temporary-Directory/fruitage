@@ -1,4 +1,6 @@
 import { View, TouchableOpacity, Image } from "react-native";
+import { useState } from "react";
+
 import SplashScreen from "./src/screens/SplashScreen";
 import CharacterScreen from "./src/screens/CharacterScreen";
 import LoginScreen from "./src/screens/LoginScreen";
@@ -8,6 +10,8 @@ import DictionaryScreen from "./src/screens/DictionaryScreen";
 import CalendarScreen from "./src/screens/CalendarScreen";
 import MainScreen from "./src/screens/MainScreen";
 import SettingScreen from "./src/screens/SettingsScreen";
+
+import CustomWebView from "./src/components/WebView";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -113,21 +117,27 @@ export default function App() {
   <DictionaryScreen />
   <CalendarScreen /> */
   }
+  const [signedIn, setSignedIn] = useState(false);
 
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: "red",
-        }}
-        tabBar={(props) => <TabBar {...props} />}
-        initialRouteName="Main"
-      >
-        <Tab.Screen name="Calendar" component={CalendarScreen} />
-        <Tab.Screen name="Main" component={MainScreen} />
-        <Tab.Screen name="Setting" component={SettingScreen} />
-      </Tab.Navigator>
+      {signedIn === true ? (
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: "red",
+          }}
+          tabBar={(props) => <TabBar {...props} />}
+          initialRouteName="Main"
+        >
+          <Tab.Screen name="Calendar" component={CalendarScreen} />
+          <Tab.Screen name="Main" component={MainScreen} />
+          <Tab.Screen name="Setting" component={SettingScreen} />
+        </Tab.Navigator>
+      ) : (
+        // <LoginScreen signedIn setSignedIn />
+        <CustomWebView />
+      )}
     </NavigationContainer>
   );
 }
