@@ -3,15 +3,18 @@ package com.temporary_directory.fruitage.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.temporary_directory.fruitage.dto.response.CalendarResponseDTO;
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
 import com.temporary_directory.fruitage.dto.response.CommitResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodoResponseDTO;
 import com.temporary_directory.fruitage.entity.Category;
 import com.temporary_directory.fruitage.entity.Todo;
 import com.temporary_directory.fruitage.entity.User;
+import com.temporary_directory.fruitage.entity.UserFruit;
 import com.temporary_directory.fruitage.externalApi.GitHubApi;
 import com.temporary_directory.fruitage.repository.CategoryRepository;
 import com.temporary_directory.fruitage.repository.TodoRepository;
+import com.temporary_directory.fruitage.repository.UserFruitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 public class CalendarServiceImpl implements CalendarService {
     private final CategoryRepository categoryRepository;
     private final TodoRepository todoRepository;
+    private final UserFruitRepository userFruitRepository;
     private final GitHubApi gitHubApi;
 
     @Override
@@ -136,5 +140,43 @@ public class CalendarServiceImpl implements CalendarService {
             }
         }
         return commitResponseDTOList;
+    }
+
+    @Override
+    public CalendarResponseDTO getCalendar(User user, String flag, LocalDate date) throws JsonProcessingException {
+        List<String> fruitImage = new ArrayList<>();
+        List<UserFruit> userFruits = userFruitRepository.findByUserAndFruitIsSelected(user, true);
+        for (UserFruit userFruit : userFruits) {
+            fruitImage.add(userFruit.getFruit().getFruitImage());
+        }
+
+        boolean days[] = new boolean[32];
+        if (flag.equals("commit")) {
+            String result = gitHubApi.getEvents(user.getUserLoginName());
+            if (result != null) {
+                JsonNode jsonNode = new ObjectMapper().readTree(result);
+
+                for (JsonNode node : jsonNode) {
+                    if (node.get("type").asText().equals("PushEvent")) {
+                        String time = node.get("created_at").asText();
+                        Instant instant = Instant.parse(time);
+                        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+                        LocalDate localDate = zonedDateTime.toLocalDate();
+
+                        if (localDate.getYear() == date.getYear() && localDate.getMonth() == date.getMonth() && !days[localDate.getDayOfMonth()]) {
+                            days[localDate.getDayOfMonth()] = true;
+                        }
+                    }
+                }
+            }
+        } else {
+            List<Todo> todos = todoRepository.findByUserAndTodoCompleteAndTodoDateBetween(user, true, date.withDayOfMonth(1), date.withDayOfMonth(date.lengthOfMonth()));
+            for (Todo todo : todos) {
+                if (!days[todo.getTodoDate().getDayOfMonth()]) {
+                    days[todo.getTodoDate().getDayOfMonth()] = true;
+                }
+            }
+        }
+        return new CalendarResponseDTO(fruitImage, days);
     }
 }

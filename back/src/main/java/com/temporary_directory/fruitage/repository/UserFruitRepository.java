@@ -9,6 +9,10 @@ import java.util.List;
 
 public interface UserFruitRepository extends JpaRepository<UserFruit, Integer> {
     int countByUser(User user);
+
     UserFruit findByUserAndFruit(User user, Fruit fruit);
+
     List<UserFruit> findByUser(User user);
+
+    List<UserFruit> findByUserAndFruitIsSelected(User user, boolean selected);
 }

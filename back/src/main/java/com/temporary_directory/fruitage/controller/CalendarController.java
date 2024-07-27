@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CategoryRequestDTO;
 import com.temporary_directory.fruitage.dto.request.TodoRequestDTO;
+import com.temporary_directory.fruitage.dto.response.CalendarResponseDTO;
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
 import com.temporary_directory.fruitage.dto.response.CommitResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodoResponseDTO;
@@ -83,5 +84,11 @@ public class CalendarController {
     @ResponseStatus(code = HttpStatus.OK)
     public List<CommitResponseDTO> getCommit(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam(value = "date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws JsonProcessingException {
         return calendarService.getCommit(principalDetails.getUser(), date);
+    }
+
+    @GetMapping
+    @ResponseStatus(code = HttpStatus.OK)
+    public CalendarResponseDTO getCalendar(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam(value="flag") String flag, @RequestParam(value = "date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws JsonProcessingException {
+        return calendarService.getCalendar(principalDetails.getUser(), flag, date);
     }
 }
