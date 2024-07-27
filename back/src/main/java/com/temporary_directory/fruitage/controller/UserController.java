@@ -32,6 +32,12 @@ public class UserController {
         userService.updateCharacter(principalDetails.getUser(), characterRequestDTO.getCharacterType());
     }
 
+    @GetMapping("/character")
+    @ResponseStatus(code= HttpStatus.OK)
+    public CharacterResponseDTO getCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails){
+        return userService.getCharacter(principalDetails.getUser());
+    }
+
     // fruit
     @GetMapping("/fruit")
     @ResponseStatus(code = HttpStatus.OK)

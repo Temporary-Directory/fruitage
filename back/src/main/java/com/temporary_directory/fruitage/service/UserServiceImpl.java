@@ -3,10 +3,7 @@ package com.temporary_directory.fruitage.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
-import com.temporary_directory.fruitage.dto.response.UserFruitInfoResponseDTO;
-import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
-import com.temporary_directory.fruitage.dto.response.UserInfoResponseDTO;
+import com.temporary_directory.fruitage.dto.response.*;
 import com.temporary_directory.fruitage.entity.*;
 import com.temporary_directory.fruitage.externalApi.GitHubApi;
 import com.temporary_directory.fruitage.repository.*;
@@ -51,8 +48,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateCharacter(User user, int characterType) {
         UserAvatar userAvatar = userAvatarRepository.findByUser(user);
-        Avatar avatar = avatarRepository.findById(characterType).orElseThrow(() -> new IllegalArgumentException("no avatar"));
-        userAvatar.updateAvatar(avatar);
+
+        if (userAvatar.getAvatar().getAvatarId() % 2 != characterType % 2) {
+            if (characterType == 1) {
+                Avatar avatar = avatarRepository.findById(userAvatar.getAvatar().getAvatarId() - 1).orElseThrow(() -> new IllegalArgumentException("no avatar"));
+                userAvatar.updateAvatar(avatar);
+            } else {
+                Avatar avatar = avatarRepository.findById(userAvatar.getAvatar().getAvatarId() + 1).orElseThrow(() -> new IllegalArgumentException("no avatar"));
+                userAvatar.updateAvatar(avatar);
+            }
+        }
+    }
+
+    @Override
+    public CharacterResponseDTO getCharacter(User user) {
+        UserAvatar userAvatar = userAvatarRepository.findByUser(user);
+        if (userAvatar.getAvatar().getAvatarId() % 2 == 0) {
+            return new CharacterResponseDTO(2, "호랑이");
+        } else {
+            return new CharacterResponseDTO(1, "곰");
+        }
     }
 
     @Override

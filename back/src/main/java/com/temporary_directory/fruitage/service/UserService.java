@@ -1,10 +1,7 @@
 package com.temporary_directory.fruitage.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
-import com.temporary_directory.fruitage.dto.response.UserFruitInfoResponseDTO;
-import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
-import com.temporary_directory.fruitage.dto.response.UserInfoResponseDTO;
+import com.temporary_directory.fruitage.dto.response.*;
 import com.temporary_directory.fruitage.entity.User;
 
 import java.util.ArrayList;
@@ -15,6 +12,8 @@ public interface UserService {
 
     void updateCharacter(User user, int characterType);
 
+    CharacterResponseDTO getCharacter(User user);
+
     FruitResponseDTO getFruitCount(User user);
 
     void selectFruit(User user, ArrayList<Integer> fruitList);
@@ -24,4 +23,5 @@ public interface UserService {
     List<FruitInfoResponseDTO> getNewFruitInfo(User user, int fruitId);
 
     UserInfoResponseDTO getUserInfo(User user) throws JsonProcessingException;
+
 }
