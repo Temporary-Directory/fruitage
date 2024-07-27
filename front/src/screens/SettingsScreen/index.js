@@ -39,7 +39,7 @@ function SettingScreen() {
   const getUsername = async () => {
     try {
       const x_auth = await AsyncStorage.getItem("authToken");
-      const url = `${USER_API_SERVER}/?flag=true`;
+      const url = `${USER_API_SERVER}?flag=true`;
 
       await axios({
         method: "get",
