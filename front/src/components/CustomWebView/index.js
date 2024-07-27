@@ -2,6 +2,7 @@ import { SafeAreaView, StyleSheet, View, Text, Dimensions } from "react-native";
 import { useRef, useEffect, useState } from "react";
 import WebView from "react-native-webview";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { API_SERVER } from "../../Config";
 
 const CustomWebView = ({ onAuthSuccess }) => {
@@ -28,17 +29,21 @@ const CustomWebView = ({ onAuthSuccess }) => {
   };
 
   const onMessage = async (event) => {
-    // console.log(event.nativeEvent);
     try {
       if (event.nativeEvent && event.nativeEvent.data) {
         if (event.nativeEvent.data.includes("accessToken=")) {
+          const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+
           const res = event.nativeEvent.data.split("; ");
           const accessToken = res[0].split("accessToken=")[1];
           const flag = res[1].split("flag=")[1] === "true" ? true : false;
 
           await AsyncStorage.setItem("authToken", accessToken);
+          await AsyncStorage.setItem(
+            "authExpirationTime",
+            (new Date().getTime() + oneDayInMilliseconds).toString()
+          );
 
-          await AsyncStorage.setItem("authToken", accessToken);
           const x_auth = await AsyncStorage.getItem("authToken");
           onAuthSuccess(flag);
         }
