@@ -17,28 +17,29 @@ import javax.persistence.*;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="category_id")
+    @Column(name = "category_id")
     private int categoryId;
 
-    @Column(name="category_name")
+    @Column(name = "category_name")
     private String categoryName;
 
-    @Column(name="category_color")
+    @Column(name = "category_color")
     private String categoryColor;
 
-    @Column(name="category_is_deleted", columnDefinition = "TINYINT(1)")
+    @Column(name = "category_is_deleted", columnDefinition = "TINYINT(1)")
     private boolean categoryIsDeleted;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
-    public void deleteCategory(){
-        this.categoryIsDeleted=true;
+    public void deleteCategory() {
+        this.categoryIsDeleted = true;
     }
+
     public void updateCategory(String categoryName, String categoryColor) {
-        this.categoryName=categoryName;
-        this.categoryColor=categoryColor;
+        this.categoryName = categoryName;
+        this.categoryColor = categoryColor;
     }
 }

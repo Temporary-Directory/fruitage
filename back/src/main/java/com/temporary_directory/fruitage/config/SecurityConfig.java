@@ -25,8 +25,9 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService;
     private final CustomOAuthSuccessHandler customOAuthSuccessHandler;
     private final JwtTokenProvider jwtTokenProvider;
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
                 .httpBasic().disable()
@@ -49,8 +50,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource cors(){
-        CorsConfiguration corsConfiguration=new CorsConfiguration();
+    public CorsConfigurationSource cors() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of(
                 "http://localhost:3000"
         ));
@@ -58,7 +59,7 @@ public class SecurityConfig {
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource=new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
         return urlBasedCorsConfigurationSource;
     }

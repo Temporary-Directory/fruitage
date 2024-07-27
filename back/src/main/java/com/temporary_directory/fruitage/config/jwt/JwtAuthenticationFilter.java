@@ -16,14 +16,15 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token= jwtTokenProvider.resolveToken(request);
+        String token = jwtTokenProvider.resolveToken(request);
 
         log.info("[doFilterInternal] token 값 추출 완료. token: {}", token);
 
-        if(token!=null && jwtTokenProvider.validateToken(token)){
-            Authentication authentication=jwtTokenProvider.getAuthentication(token);
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.info("[doFilterInternal] token 값 유효성 체크 완료");
         }

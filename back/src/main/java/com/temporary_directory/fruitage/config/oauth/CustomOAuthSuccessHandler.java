@@ -32,9 +32,9 @@ public class CustomOAuthSuccessHandler implements AuthenticationSuccessHandler {
         Cookie accessCookie = new Cookie("accessToken", accessToken);
         Cookie flagCookie = new Cookie("flag", String.valueOf(principalDetails.isFlag()));
         accessCookie.setPath("/");
-        accessCookie.setMaxAge(60 * 60 * 2);
+        accessCookie.setMaxAge(60 * 60 * 1);
         flagCookie.setPath("/");
-        flagCookie.setMaxAge(60 * 60 * 2);
+        flagCookie.setMaxAge(60 * 60 * 1);
 
         response.addCookie(accessCookie);
         response.addCookie(flagCookie);
