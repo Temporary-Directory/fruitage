@@ -1,5 +1,8 @@
 import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Bear from "../../assets/images/character-bear.png";
 import Tiger from "../../assets/images/character-tiger.png";
@@ -7,17 +10,108 @@ import Commit from "../../assets/icons/ic_commit.png";
 import CommitCal from "../../assets/icons/ic_commit-cal.png";
 import Todo from "../../assets/icons/ic_todo.png";
 import TodoUn from "../../assets/icons/ic_todo-un.png";
+import { API_SERVER, USER_API_SERVER } from "../../Config";
 
 function MainScreen() {
-  const [username, setUsername] = useState("UserName"); // get username from local storage
+  const [username, setUsername] = useState("username"); // getUsername(); // get username from local storage
   const [character, setCharacter] = useState(true); // true: bear
   const [level, setLevel] = useState("포도"); // get current level from BE
   const [score, setScore] = useState(24); // get current score from BE
 
-  const [commit, setCommit] = useState(4); // get the number of today's commit from BE
-  const [ndays, setNdays] = useState(4); // get the how many days (commit) from BE
-  const [done, setDone] = useState(4); // get today's done-todo from BE
-  const [undone, setUndone] = useState(4); // get today's undone-todo from BE
+  const [nCommits, setNCommits] = useState(4); // get the number of today's commit from BE
+  const [nDays, setNDays] = useState(4); // get the how many days (commit) from BE
+  const [complete, setComplete] = useState(4); // get today's done-todo from BE
+  const [incomplete, setIncomplete] = useState(4); // get today's undone-todo from BE
+
+  const getUsername = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${USER_API_SERVER}/?flag=false`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            setUsername(response.data.userName);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user's name:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getUsername function:", error);
+    }
+  };
+
+  const getTodayCommit = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${API_SERVER}/today/commit`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          setNCommits(response.data.commit);
+          setNDays(response.data.days);
+        })
+        .catch((error) => {
+          console.error("Error fetching today's commit data:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getTodayCommit function:", error);
+    }
+  };
+
+  const getTodayTodo = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${API_SERVER}/today/todo`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          setComplete(response.data.todoComplete);
+          setIncomplete(response.data.todoIncomplete);
+        })
+        .catch((error) => {
+          console.error("Error fetching today's todo data:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getTodayTodo function:", error);
+    }
+  };
+
+  useEffect(() => {
+    getUsername();
+    getTodayCommit();
+    getTodayTodo();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Action to perform when the screen is focused
+      getUsername();
+      getTodayCommit();
+      getTodayTodo();
+
+      return () => {
+        // Cleanup action if needed
+        // action when the screen is unfocused
+      };
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -111,7 +205,7 @@ function MainScreen() {
                     marginBottom: 6,
                   }}
                 >
-                  {commit}개
+                  {nCommits}개
                 </Text>
                 <Text style={{ fontSize: 9, color: "#606060" }}>오늘</Text>
               </View>
@@ -133,7 +227,7 @@ function MainScreen() {
                     marginBottom: 6,
                   }}
                 >
-                  {ndays}일
+                  {nDays}일
                 </Text>
                 <Text style={{ fontSize: 9, color: "#606060" }}>연속</Text>
               </View>
@@ -175,7 +269,7 @@ function MainScreen() {
                     marginBottom: 6,
                   }}
                 >
-                  {done}개
+                  {complete}개
                 </Text>
                 <Text style={{ fontSize: 9, color: "#606060" }}>완료</Text>
               </View>
@@ -197,7 +291,7 @@ function MainScreen() {
                     marginBottom: 6,
                   }}
                 >
-                  {undone}개
+                  {incomplete}개
                 </Text>
                 <Text style={{ fontSize: 9, color: "#606060" }}>미완료</Text>
               </View>
