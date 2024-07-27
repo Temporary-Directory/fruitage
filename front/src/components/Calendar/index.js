@@ -6,7 +6,7 @@ import Blueberry from "../../assets/images/fruits/blueberry.png";
 import Left from "../../assets/images/ic_left.png";
 import Right from "../../assets/images/ic_right.png";
 
-const Calendar = ({ mode, setMode, selectedDate, setSelectedDate }) => {
+const Calendar = ({ mode, setMode, selectedDate, onSelectedDate }) => {
   const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [today, setToday] = useState(new Date()); // fixed real today date
@@ -110,7 +110,7 @@ const Calendar = ({ mode, setMode, selectedDate, setSelectedDate }) => {
             <TouchableOpacity
               key={i}
               onPress={() => {
-                setSelectedDate(date);
+                onSelectedDate(date);
               }}
               style={styles.day}
               activeOpacity={0.9}
