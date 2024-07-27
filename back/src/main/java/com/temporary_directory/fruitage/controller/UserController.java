@@ -33,8 +33,8 @@ public class UserController {
     }
 
     @GetMapping("/character")
-    @ResponseStatus(code= HttpStatus.OK)
-    public CharacterResponseDTO getCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails){
+    @ResponseStatus(code = HttpStatus.OK)
+    public CharacterResponseDTO getCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         return userService.getCharacter(principalDetails.getUser());
     }
 
@@ -75,8 +75,8 @@ public class UserController {
     }
 
     @DeleteMapping
-    @ResponseStatus(code= HttpStatus.OK)
-    public void deleteUser(@AuthenticationPrincipal PrincipalDetails principalDetails){
+    @ResponseStatus(code = HttpStatus.OK)
+    public void deleteUser(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         userService.deleteUser(principalDetails.getUser());
     }
 }
