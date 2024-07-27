@@ -12,17 +12,21 @@ import Todo from "../../assets/icons/ic_todo.png";
 import TodoUn from "../../assets/icons/ic_todo-un.png";
 import { API_SERVER, USER_API_SERVER } from "../../Config";
 import ProgressBar from "../../components/ProgressBar";
+import NewFruitScreen from "../NewFruitScreen";
 
 function MainScreen() {
   const [username, setUsername] = useState("username"); // getUsername(); // get username from local storage
-  const [character, setCharacter] = useState(true); // true: bear
+  const [character, setCharacter] = useState(""); // true: bear
   const [level, setLevel] = useState("포도"); // get current level from BE
-  const [score, setScore] = useState(24); // get current score from BE
+  const [score, setScore] = useState(0); // get current score from BE
 
-  const [nCommits, setNCommits] = useState(4); // get the number of today's commit from BE
-  const [nDays, setNDays] = useState(4); // get the how many days (commit) from BE
-  const [complete, setComplete] = useState(4); // get today's done-todo from BE
-  const [incomplete, setIncomplete] = useState(4); // get today's undone-todo from BE
+  const [nCommits, setNCommits] = useState(0); // get the number of today's commit from BE
+  const [nDays, setNDays] = useState(0); // get the how many days (commit) from BE
+  const [complete, setComplete] = useState(0); // get today's done-todo from BE
+  const [incomplete, setIncomplete] = useState(0); // get today's undone-todo from BE
+
+  const [newVisible, setNewVisible] = useState(false);
+  const [newFruits, setNewFruits] = useState(null);
 
   const getUsername = async () => {
     try {
@@ -52,7 +56,6 @@ function MainScreen() {
     try {
       const x_auth = await AsyncStorage.getItem("authToken");
       const url = `${API_SERVER}/today`;
-      console.log("yo", url);
 
       await axios({
         method: "get",
@@ -61,19 +64,23 @@ function MainScreen() {
       })
         .then((response) => {
           if (response.status === 200) {
-            console.log(response.data);
-            const newFruit = response.data.newFruit;
+            const resNewFruits = response.data.newFruit;
+            if (resNewFruits.length > 0) {
+              setNewFruits([...resNewFruits]);
+              setNewVisible(true);
+            }
             const todayStatus = response.data.todayStatus;
             setLevel(todayStatus.fruitName);
             setScore(30 - todayStatus.userFruitGauge);
+            setCharacter(todayStatus.characterImage);
           }
         })
         .catch((error) => {
-          console.error("Error fetching user's name:", error);
+          console.error("Error fetching user's today:", error);
         });
     } catch (error) {
       // Handle errors related to AsyncStorage or other issues here
-      console.error("Error in getUsername function:", error);
+      console.error("Error in getToday function:", error);
     }
   };
 
@@ -134,6 +141,7 @@ function MainScreen() {
     useCallback(() => {
       // Action to perform when the screen is focused
       getUsername();
+      getToday();
       getTodayCommit();
       getTodayTodo();
 
@@ -154,10 +162,12 @@ function MainScreen() {
           </Text>
         </View>
         <View style={{ marginBottom: 14 }}>
-          <Image
-            style={{ width: 220, height: 280, resizeMode: "contain" }}
-            source={character ? Bear : Tiger}
-          />
+          {character !== "" && (
+            <Image
+              style={{ width: 220, height: 280, resizeMode: "contain" }}
+              source={{ uri: character }}
+            />
+          )}
         </View>
         <View style={styles.fruitState}>
           <Text style={{ fontSize: 16, fontWeight: "700", marginLeft: -2 }}>
@@ -332,6 +342,14 @@ function MainScreen() {
           </View>
         </View>
       </View>
+      {newFruits && (
+        <NewFruitScreen
+          visible={newVisible}
+          setVisible={setNewVisible}
+          newFruits={newFruits}
+          setNewFruits={setNewFruits}
+        />
+      )}
     </View>
   );
 }
