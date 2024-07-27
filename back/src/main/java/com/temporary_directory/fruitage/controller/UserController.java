@@ -57,12 +57,6 @@ public class UserController {
         return userService.getFruitInfo(principalDetails.getUser());
     }
 
-    @GetMapping("/fruit/{fruitId}")
-    @ResponseStatus(code = HttpStatus.OK)
-    public List<FruitInfoResponseDTO> getNewFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable("fruitId") int fruitId) {
-        return userService.getNewFruitInfo(principalDetails.getUser(), fruitId);
-    }
-
     // user
     @GetMapping
     @ResponseStatus(code = HttpStatus.OK)

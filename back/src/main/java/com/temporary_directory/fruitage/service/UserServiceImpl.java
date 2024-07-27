@@ -91,24 +91,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<FruitInfoResponseDTO> getNewFruitInfo(User user, int fruitId) {
-        UserAvatar userAvatar = userAvatarRepository.findByUser(user);
-
-        List<FruitInfoResponseDTO> fruitInfoResponseDTOList = new ArrayList<>();
-
-        Fruit fruit = null;
-        for (int i = userAvatar.getFruit().getFruitId() + 1; i <= fruitId; i++) {
-            fruit = fruitRepository.findById(i).orElseThrow(() -> new IllegalArgumentException("no fruit"));
-            fruitInfoResponseDTOList.add(FruitInfoResponseDTO.toDto(fruit));
-
-            createFruit(user, fruit, false);
-        }
-        userAvatar.updateFruit(fruit);
-
-        return fruitInfoResponseDTOList;
-    }
-
-    @Override
     public UserInfoResponseDTO getUserInfo(User user) throws JsonProcessingException {
 
         int commit = 0;

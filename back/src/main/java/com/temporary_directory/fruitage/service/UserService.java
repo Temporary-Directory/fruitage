@@ -20,8 +20,6 @@ public interface UserService {
 
     List<UserFruitInfoResponseDTO> getFruitInfo(User user);
 
-    List<FruitInfoResponseDTO> getNewFruitInfo(User user, int fruitId);
-
     UserInfoResponseDTO getUserInfo(User user) throws JsonProcessingException;
 
 }

@@ -3,14 +3,13 @@ package com.temporary_directory.fruitage.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodayCommitResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodayStatusResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodayTodoResponseDTO;
-import com.temporary_directory.fruitage.entity.User;
-import com.temporary_directory.fruitage.entity.UserAvatar;
+import com.temporary_directory.fruitage.entity.*;
 import com.temporary_directory.fruitage.externalApi.GitHubApi;
-import com.temporary_directory.fruitage.repository.TodoRepository;
-import com.temporary_directory.fruitage.repository.UserAvatarRepository;
+import com.temporary_directory.fruitage.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +18,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 @Service
 @Transactional
@@ -28,6 +26,9 @@ import java.util.Collections;
 public class TodayServiceImpl implements TodayService {
     private final TodoRepository todoRepository;
     private final UserAvatarRepository userAvatarRepository;
+    private final FruitRepository fruitRepository;
+    private final UserFruitRepository userFruitRepository;
+    private final AvatarRepository avatarRepository;
     private final GitHubApi gitHubApi;
 
     @Override
@@ -82,10 +83,9 @@ public class TodayServiceImpl implements TodayService {
     }
 
     @Override
-    public TodayStatusResponseDTO getTodayStatus(User user) throws JsonProcessingException {
+    public Map<String, Object> getTodayStatus(User user) throws JsonProcessingException {
 
         UserAvatar userAvatar = userAvatarRepository.findByUser(user);
-        TodayStatusResponseDTO todayStatusResponseDTO = new TodayStatusResponseDTO(userAvatar);
 
         if (!(userAvatar.getRecentDate().getYear() == LocalDate.now().getYear() && userAvatar.getRecentDate().getMonth() == LocalDate.now().getMonth())) {
             userAvatar.updateFruitGauge(0);
@@ -113,9 +113,40 @@ public class TodayServiceImpl implements TodayService {
             }
         }
 
-        commitCount = Math.max(userAvatar.getFruitGauge(), todoCount + commitCount);
-        userAvatar.updateFruitGauge(commitCount);
-        todayStatusResponseDTO.setUserFruitGauge(30 - (commitCount % 30));
-        return todayStatusResponseDTO;
+        int count = Math.max(userAvatar.getFruitGauge(), todoCount + commitCount);
+        int avatarNum = userAvatar.getAvatar().getAvatarId();
+
+        List<FruitInfoResponseDTO> fruitInfoResponseDTOList = new ArrayList<>();
+        if(userAvatar.getFruitGauge()/30 < count/30){
+            Fruit fruit = null;
+            for (int i = 1; i <= count/30 - userAvatar.getFruitGauge()/30 ; i++) {
+                fruit = fruitRepository.findById(userAvatar.getFruit().getFruitId()+i).orElseThrow(() -> new IllegalArgumentException("no fruit"));
+                fruitInfoResponseDTOList.add(FruitInfoResponseDTO.toDto(fruit));
+                avatarNum+=2;
+
+                createFruit(user, fruit, false);
+            }
+            userAvatar.updateFruit(fruit);
+        }
+
+        userAvatar.updateFruitGauge(count);
+        TodayStatusResponseDTO todayStatusResponseDTO = new TodayStatusResponseDTO(userAvatar);
+        todayStatusResponseDTO.setUserFruitGauge(30 - (count % 30));
+        Avatar avatar = avatarRepository.findById(avatarNum).orElseThrow(() -> new IllegalArgumentException("no avatar"));
+        userAvatar.updateAvatar(avatar);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("todayStatus", todayStatusResponseDTO);
+        map.put("newFruit", fruitInfoResponseDTOList);
+        return map;
+    }
+
+    public void createFruit(User user, Fruit fruit, boolean flag) {
+        UserFruit userFruit = UserFruit.builder()
+                .user(user)
+                .fruit(fruit)
+                .fruitIsSelected(flag)
+                .build();
+        userFruitRepository.save(userFruit);
     }
 }
