@@ -106,10 +106,6 @@ function DictionaryScreen({ visible, setVisible }) {
     setFruits(newFruits);
   };
 
-  const onClose = () => {
-    console.log("Close button is pressed!");
-  };
-
   const onPressEdit = () => {
     if (edit) {
       var cnt = 0;
@@ -124,6 +120,8 @@ function DictionaryScreen({ visible, setVisible }) {
       } else {
         if (changed.length > 0) {
           saveFruits();
+        } else {
+          setEdit(false);
         }
       }
     } else {
@@ -158,7 +156,6 @@ function DictionaryScreen({ visible, setVisible }) {
 
   const closeModal = () => {
     closeBottomSheet.start(() => {
-      onClose();
       setVisible(false);
     });
   };
@@ -174,7 +171,9 @@ function DictionaryScreen({ visible, setVisible }) {
         <View style={styles.header}>
           <TouchableOpacity onPress={closeModal} activeOpacity={0.5}>
             {/* <AntDesign name="close" size={30} color="black" /> */}
-            <Image style={{ width: 20, height: 20 }} source={Close3} />
+            {!edit && (
+              <Image style={{ width: 20, height: 20 }} source={Close3} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={onPressEdit} activeOpacity={0.5}>
             {/* <MaterialIcons
