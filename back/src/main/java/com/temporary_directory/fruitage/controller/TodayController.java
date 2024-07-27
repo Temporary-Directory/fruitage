@@ -1,7 +1,9 @@
 package com.temporary_directory.fruitage.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.response.TodayCommitResponseDTO;
+import com.temporary_directory.fruitage.dto.response.TodayStatusResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodayTodoResponseDTO;
 import com.temporary_directory.fruitage.service.TodayService;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +30,11 @@ public class TodayController {
     @ResponseStatus(code= HttpStatus.OK)
     public TodayCommitResponseDTO getCommitCount(@AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
         return todayService.getCommitCount(principalDetails.getUser().getUserLoginName());
+    }
+
+    @GetMapping
+    @ResponseStatus(code=HttpStatus.OK)
+    public TodayStatusResponseDTO getTodayStatus(@AuthenticationPrincipal PrincipalDetails principalDetails) throws JsonProcessingException {
+        return todayService.getTodayStatus(principalDetails.getUser());
     }
 }
