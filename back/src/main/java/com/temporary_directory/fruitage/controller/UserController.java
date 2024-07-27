@@ -1,11 +1,10 @@
 package com.temporary_directory.fruitage.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CharacterRequestDTO;
 import com.temporary_directory.fruitage.dto.request.FruitRequestDTO;
-import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
-import com.temporary_directory.fruitage.dto.response.UserFruitInfoResponseDTO;
-import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
+import com.temporary_directory.fruitage.dto.response.*;
 import com.temporary_directory.fruitage.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,40 +21,62 @@ public class UserController {
 
     // character
     @PostMapping("/character")
-    @ResponseStatus(code= HttpStatus.OK)
-    public void createCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CharacterRequestDTO characterRequestDTO){
+    @ResponseStatus(code = HttpStatus.OK)
+    public void createCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CharacterRequestDTO characterRequestDTO) {
         userService.createCharacter(principalDetails.getUser(), characterRequestDTO.getCharacterType());
     }
 
     @PutMapping("/character")
     @ResponseStatus(code = HttpStatus.OK)
-    public void updateCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CharacterRequestDTO characterRequestDTO){
+    public void updateCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody CharacterRequestDTO characterRequestDTO) {
         userService.updateCharacter(principalDetails.getUser(), characterRequestDTO.getCharacterType());
+    }
+
+    @GetMapping("/character")
+    @ResponseStatus(code= HttpStatus.OK)
+    public CharacterResponseDTO getCharacter(@AuthenticationPrincipal PrincipalDetails principalDetails){
+        return userService.getCharacter(principalDetails.getUser());
     }
 
     // fruit
     @GetMapping("/fruit")
     @ResponseStatus(code = HttpStatus.OK)
-    public FruitResponseDTO getFruitCount(@AuthenticationPrincipal PrincipalDetails principalDetails){
+    public FruitResponseDTO getFruitCount(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         return userService.getFruitCount(principalDetails.getUser());
     }
 
     @PostMapping("/fruit")
     @ResponseStatus(code = HttpStatus.OK)
-    public void selectFruit(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody FruitRequestDTO fruitRequestDTO){
+    public void selectFruit(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody FruitRequestDTO fruitRequestDTO) {
         userService.selectFruit(principalDetails.getUser(), fruitRequestDTO.getFruitIdList());
     }
 
     @GetMapping("/fruit/info")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<UserFruitInfoResponseDTO> getFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails){
+    public List<UserFruitInfoResponseDTO> getFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         return userService.getFruitInfo(principalDetails.getUser());
     }
 
     @GetMapping("/fruit/{fruitId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<FruitInfoResponseDTO> getNewFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable("fruitId") int fruitId){
+    public List<FruitInfoResponseDTO> getNewFruitInfo(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable("fruitId") int fruitId) {
         return userService.getNewFruitInfo(principalDetails.getUser(), fruitId);
     }
 
+    // user
+    @GetMapping
+    @ResponseStatus(code = HttpStatus.OK)
+    public UserNameResponseDTO getUserName(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam("flag") boolean flag) {
+        if (flag) {
+            return new UserNameResponseDTO(principalDetails.getUser().getUserLoginName());
+        } else {
+            return new UserNameResponseDTO(principalDetails.getUser().getUserName());
+        }
+    }
+
+    @GetMapping("/info")
+    @ResponseStatus(code = HttpStatus.OK)
+    public UserInfoResponseDTO getUserInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) throws JsonProcessingException {
+        return userService.getUserInfo(principalDetails.getUser());
+    }
 }

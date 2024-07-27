@@ -15,4 +15,6 @@ public interface TodoRepository extends JpaRepository<Todo, Integer> {
     int countByUserAndTodoComplete(User user, boolean flag);
 
     List<Todo> findByUserAndTodoCompleteAndTodoDateBetween(User user, boolean flag, LocalDate start, LocalDate end);
+
+    int countByUserAndTodoCompleteAndTodoDateBetween(User user, boolean flag, LocalDate start, LocalDate end);
 }
