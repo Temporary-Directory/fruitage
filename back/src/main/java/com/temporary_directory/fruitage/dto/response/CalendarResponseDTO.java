@@ -9,5 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 public class CalendarResponseDTO {
     private List<String> fruitImage;
+    private String emptyFruitImage;
     private boolean[] days;
 }
