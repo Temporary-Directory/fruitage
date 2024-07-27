@@ -18,9 +18,6 @@ public class Avatar {
     @Column(name="avatar_id")
     private int avatarId;
 
-    @Column(name="avatar_name")
-    private String avatarName;
-
     @Column(name="avatar_image")
     private String avatarImage;
 }
