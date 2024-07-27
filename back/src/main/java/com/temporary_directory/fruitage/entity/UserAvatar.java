@@ -36,5 +36,6 @@ public class UserAvatar {
     public void updateAvatar(Avatar avatar){
         this.avatar=avatar;
     }
-    public void updateFruit(Fruit fruit) {this.fruit = fruit; }
+    public void updateFruit(Fruit fruit) { this.fruit = fruit; }
+    public void updateFruitGauge(int gauge) { this.fruitGauge = gauge; }
 }
