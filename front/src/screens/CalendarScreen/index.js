@@ -224,13 +224,10 @@ function CalendarScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setMode(false);
+
       // Action to perform when the screen is focused
-      if (mode) {
-        // getCategories();
-        getTodos();
-      } else {
-        getCommits();
-      }
+      getCommits();
       getCalendar();
 
       return () => {
