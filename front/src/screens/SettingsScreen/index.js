@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Alert,
 } from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
@@ -15,7 +16,8 @@ import { USER_API_SERVER } from "../../Config";
 import CharacterSettingScreen from "../CharacterSettingScreen";
 import DictionaryScreen from "../DictionaryScreen";
 
-function SettingScreen() {
+function SettingScreen({ setSignedIn }) {
+  const [deleteVisible, setDeleteVisible] = useState(false);
   const [characterSettingScreenVisible, setCharacterSettingScreenVisible] =
     useState(false);
   const [dictionaryScreenVisible, setDictionaryScreenVisible] = useState(false);
@@ -131,6 +133,55 @@ function SettingScreen() {
     }
   };
 
+  const logoutHandler = async () => {
+    try {
+      await AsyncStorage.removeItem("authToken");
+      setSignedIn(false);
+    } catch (error) {
+      console.error("Error removing the token:", error);
+    }
+  };
+
+  const onDeleteUser = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${USER_API_SERVER}`;
+
+      await axios({
+        method: "delete",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          setSignedIn(false);
+        })
+        .catch((error) => {
+          console.error("Error deleting user's account:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in deleteUserHandler function:", error);
+    }
+  };
+
+  const deleteUserHandler = async () => {
+    Alert.alert(
+      // 말그대로 Alert를 띄운다
+      "정말로 탈퇴하실 건가요?", // 첫번째 text: 타이틀 제목
+      "진짜로? 정말로?", // 두번째 text: 그 밑에 작은 제목
+      [
+        // 버튼 배열
+        {
+          text: "취소",
+          onPress: () => console.log("canceled"), //onPress 이벤트시 콘솔창에 로그를 찍는다
+          style: "cancel",
+        },
+        { text: "네", onPress: () => onDeleteUser() },
+      ],
+      { cancelable: false }
+    );
+  };
+
   useEffect(() => {
     getUsername();
     getUserInfo();
@@ -182,14 +233,15 @@ function SettingScreen() {
               >
                 <View
                   style={{
-                    width: 15,
-                    height: 15,
+                    width: 4,
+                    height: 18,
                     marginRight: 10,
                     borderRadius: 90,
                     backgroundColor: "#555555",
                   }}
                 ></View>
                 <TouchableOpacity
+                  onPress={() => setDeleteVisible(!deleteVisible)}
                   style={{ justifyContent: "center", alignItems: "center" }}
                   activeOpacity={0.8}
                 >
@@ -200,12 +252,44 @@ function SettingScreen() {
               </View>
 
               <TouchableOpacity
+                onPress={logoutHandler}
                 style={{ justifyContent: "center", alignItems: "center" }}
                 activeOpacity={0.8}
               >
                 <Text style={{ fontSize: 11, color: "#A1A1A1" }}>로그아웃</Text>
               </TouchableOpacity>
             </View>
+            {deleteVisible && (
+              <TouchableOpacity
+                onPress={deleteUserHandler}
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: 14,
+                  marginBottom: -8,
+                }}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={{
+                    borderBottomColor: "#FF5154",
+                    borderBottomWidth: 1,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      color: "red",
+                      borderBottomColor: "#FF5154",
+                      borderBottomWidth: 1,
+                      letterSpacing: 0.6,
+                    }}
+                  >
+                    회원 탈퇴
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
         <View style={styles.halfBoxContainer}>
@@ -284,7 +368,7 @@ function SettingScreen() {
             </View>
           </View>
         </View>
-        <View
+        {/* <View
           style={{
             width: "100%",
             flexDirection: "row",
@@ -300,7 +384,7 @@ function SettingScreen() {
             onToggle={() => console.log("toggle pressed")}
             isOn={false}
           />
-        </View>
+        </View> */}
         <View
           style={{
             width: "98%",
