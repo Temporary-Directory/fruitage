@@ -1,12 +1,33 @@
-import { View, Image, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Image,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
 import Logo from "../../assets/images/fruitage-eng-w280-2.png";
 import FruitBox from "../../assets/images/fruit-box.png";
+import CustomWebView from "../../components/CustomWebView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-function LoginScreen() {
+function LoginScreen({ navigation, signedIn, setSignedIn }) {
+  const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const onSubmitLogin = () => {
     console.log("Login Button is pressed!");
+    setVisible(true);
+  };
+
+  const handleAuthSuccess = async (d) => {
+    console.log("auth success", d); // Check response from CustomWebView
+    console.log(await AsyncStorage.getItem("authToken")); // Check authToken stored in AsyncStorage
+    setSignedIn(true);
+    setVisible(false); // Hide CustomWebView when auth is successful
   };
 
   const onSubmitSignUp = () => {
@@ -16,27 +37,37 @@ function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}></View>
-      <View style={styles.body}>
-        <Image source={Logo} style={{ width: 240, resizeMode: "contain" }} />
-        <Image source={FruitBox} style={styles.imgFruitBox} />
-        <View style={styles.btnView}>
-          <TouchableOpacity
-            onPress={onSubmitLogin}
-            activeOpacity={0.8}
-            style={styles.btnLogin}
-          >
-            <AntDesign name="github" size={22} color="white" />
-            <Text style={styles.btnTxt}>Github으로 로그인</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={onSubmitSignUp}
-            activeOpacity={0.8}
-            style={styles.btnSignUp}
-          >
-            <Text style={{ ...styles.btnTxt, color: "#aaaaaa" }}>회원가입</Text>
-          </TouchableOpacity>
+
+      {visible ? (
+        <View style={styles.body}>
+          <CustomWebView onAuthSuccess={handleAuthSuccess} />
         </View>
-      </View>
+      ) : (
+        <View style={styles.body}>
+          <Image source={Logo} style={{ width: 240, resizeMode: "contain" }} />
+          <Image source={FruitBox} style={styles.imgFruitBox} />
+          <View style={styles.btnView}>
+            <TouchableOpacity
+              onPress={onSubmitLogin}
+              activeOpacity={0.8}
+              style={styles.btnLogin}
+            >
+              <AntDesign name="github" size={22} color="white" />
+              <Text style={styles.btnTxt}>Github으로 로그인</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={onSubmitSignUp}
+              activeOpacity={0.8}
+              style={styles.btnSignUp}
+            >
+              <Text style={{ ...styles.btnTxt, color: "#aaaaaa" }}>
+                회원가입
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
     </View>
   );
 }

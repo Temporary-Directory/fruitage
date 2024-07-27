@@ -11,7 +11,7 @@ import CalendarScreen from "./src/screens/CalendarScreen";
 import MainScreen from "./src/screens/MainScreen";
 import SettingScreen from "./src/screens/SettingsScreen";
 
-import CustomWebView from "./src/components/WebView";
+import CustomWebView from "./src/components/CustomWebView";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -108,15 +108,6 @@ function TabBar({ state, descriptors, navigation }) {
 }
 
 export default function App() {
-  {
-    /* <SplashScreen />
-  <CharacterScreen />
-  <LoginScreen />
-  <CharacterSettingScreen />
-  <NewFruitScreen />
-  <DictionaryScreen />
-  <CalendarScreen /> */
-  }
   const [signedIn, setSignedIn] = useState(false);
 
   return (
@@ -135,9 +126,26 @@ export default function App() {
           <Tab.Screen name="Setting" component={SettingScreen} />
         </Tab.Navigator>
       ) : (
-        // <LoginScreen signedIn setSignedIn />
-        <CustomWebView />
+        <LoginScreen signedIn={signedIn} setSignedIn={setSignedIn} />
+        // <CharacterScreen />
       )}
     </NavigationContainer>
   );
 }
+
+// <Stack.Navigator>
+// <Stack.Screen
+//     name="login"
+//     component={LoginScreen}
+//     options={({ navigation, signedIn, setSignedIn }) => ({
+//       // headerShown: false,
+//       title: "Login",
+//       headerLeft: () => (
+//         <TouchableOpacity onPress={() => navigation.openDrawer()}>
+//           {/* <Text>Drawer</Text> */}
+//         </TouchableOpacity>
+//       ),
+//     })}
+//   />
+//   <Stack.Screen name="Github OAuth" component={WebView} />
+// </Stack.Navigator>
