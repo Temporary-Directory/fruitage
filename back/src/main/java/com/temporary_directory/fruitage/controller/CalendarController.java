@@ -88,7 +88,7 @@ public class CalendarController {
 
     @GetMapping
     @ResponseStatus(code = HttpStatus.OK)
-    public CalendarResponseDTO getCalendar(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam(value="flag") String flag, @RequestParam(value = "date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws JsonProcessingException {
+    public CalendarResponseDTO getCalendar(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam(value = "flag") String flag, @RequestParam(value = "date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws JsonProcessingException {
         return calendarService.getCalendar(principalDetails.getUser(), flag, date);
     }
 }

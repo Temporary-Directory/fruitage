@@ -7,12 +7,10 @@ import com.temporary_directory.fruitage.dto.response.CalendarResponseDTO;
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
 import com.temporary_directory.fruitage.dto.response.CommitResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodoResponseDTO;
-import com.temporary_directory.fruitage.entity.Category;
-import com.temporary_directory.fruitage.entity.Todo;
-import com.temporary_directory.fruitage.entity.User;
-import com.temporary_directory.fruitage.entity.UserFruit;
+import com.temporary_directory.fruitage.entity.*;
 import com.temporary_directory.fruitage.externalApi.GitHubApi;
 import com.temporary_directory.fruitage.repository.CategoryRepository;
+import com.temporary_directory.fruitage.repository.FruitRepository;
 import com.temporary_directory.fruitage.repository.TodoRepository;
 import com.temporary_directory.fruitage.repository.UserFruitRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +29,7 @@ public class CalendarServiceImpl implements CalendarService {
     private final CategoryRepository categoryRepository;
     private final TodoRepository todoRepository;
     private final UserFruitRepository userFruitRepository;
+    private final FruitRepository fruitRepository;
     private final GitHubApi gitHubApi;
 
     @Override
@@ -177,6 +176,7 @@ public class CalendarServiceImpl implements CalendarService {
                 }
             }
         }
-        return new CalendarResponseDTO(fruitImage, days);
+        Fruit fruit = fruitRepository.findById(1).orElseThrow(() -> new IllegalArgumentException("no fruit"));;
+        return new CalendarResponseDTO(fruitImage, fruit.getFruitImage(), days);
     }
 }
