@@ -88,9 +88,10 @@ const CategorySettingBottomSheet = ({ visible, setVisible, onClose }) => {
         data: {
           categoryId: pressedCategory.categoryId,
           categoryName: pressedCategoryText,
-          categoryColor: pressedColor
-            ? colors[pressedColor]
-            : pressedCategory.categoryColor,
+          categoryColor:
+            pressedColor !== null
+              ? colors[pressedColor]
+              : pressedCategory.categoryColor,
         },
       })
         .then((response) => {
@@ -388,7 +389,9 @@ const CategorySettingBottomSheet = ({ visible, setVisible, onClose }) => {
                             return (
                               <Pressable
                                 key={i}
-                                onPress={() => setPressedColor(i)}
+                                onPress={() => {
+                                  setPressedColor(i);
+                                }}
                                 activeOpacity={0.8}
                                 style={({ pressed }) => [
                                   styles.colorBtn,
