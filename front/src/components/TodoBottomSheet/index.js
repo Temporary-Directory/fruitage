@@ -11,6 +11,7 @@ import {
   TextInput,
   Dimensions,
   PanResponder,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -102,11 +103,11 @@ const TodoBottomSheet = ({
     // Create a new to-do
     if (create) {
       if (content === "") {
-        console.log("Content is empty.");
+        Alert.alert("내용을 입력해주세요.");
         return;
       }
       if (selectedCategory === null) {
-        console.log("Category not selected.");
+        Alert.alert("카테고리를 선택해주세요.");
         return;
       }
 
