@@ -97,7 +97,10 @@ const DeleteBottomSheet = ({ visible, setVisible, text, func }) => {
           </View>
           <View style={{ width: "100%", paddingHorizontal: 84 }}>
             <TouchableOpacity
-              onPress={func}
+              onPress={() => {
+                closeModal();
+                func();
+              }}
               style={{
                 display: "flex",
                 justifyContent: "center",
