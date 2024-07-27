@@ -1,6 +1,8 @@
 package com.temporary_directory.fruitage.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
+import com.temporary_directory.fruitage.dto.response.CommitResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodoResponseDTO;
 import com.temporary_directory.fruitage.entity.User;
 
@@ -17,4 +19,5 @@ public interface CalendarService {
     List<TodoResponseDTO> getTodo(User user, LocalDate date);
     void updateTodo(int todoId, LocalDate todoDate, String todoContent, int categoryId);
     void deleteTodo(int todoId);
+    List<CommitResponseDTO> getCommit(User user, LocalDate date) throws JsonProcessingException;
 }

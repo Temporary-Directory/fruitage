@@ -1,30 +1,37 @@
 package com.temporary_directory.fruitage.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.temporary_directory.fruitage.dto.response.CategoryResponseDTO;
+import com.temporary_directory.fruitage.dto.response.CommitResponseDTO;
 import com.temporary_directory.fruitage.dto.response.TodoResponseDTO;
 import com.temporary_directory.fruitage.entity.Category;
 import com.temporary_directory.fruitage.entity.Todo;
 import com.temporary_directory.fruitage.entity.User;
+import com.temporary_directory.fruitage.externalApi.GitHubApi;
 import com.temporary_directory.fruitage.repository.CategoryRepository;
 import com.temporary_directory.fruitage.repository.TodoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
+import java.time.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CalendarServiceImpl implements CalendarService{
+public class CalendarServiceImpl implements CalendarService {
     private final CategoryRepository categoryRepository;
     private final TodoRepository todoRepository;
+    private final GitHubApi gitHubApi;
 
     @Override
     public void createCategory(User user, String categoryName, String categoryColor) {
-        Category category=Category.builder()
+        Category category = Category.builder()
                 .categoryName(categoryName)
                 .categoryColor(categoryColor)
                 .user(user)
@@ -39,20 +46,20 @@ public class CalendarServiceImpl implements CalendarService{
 
     @Override
     public void deleteCategory(int categoryId) {
-        Category category= categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("no category"));
         category.deleteCategory();
     }
 
     @Override
     public void updateCategory(int categoryId, String categoryName, String categoryColor) {
-        Category category=categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("no category"));
         category.updateCategory(categoryName, categoryColor);
     }
 
     @Override
     public void createTodo(User user, LocalDate todoDate, String todoContent, int categoryId) {
-        Category category=categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
-        Todo todo= Todo.builder()
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("no category"));
+        Todo todo = Todo.builder()
                 .todoDate(todoDate)
                 .todoContent(todoContent)
                 .category(category)
@@ -63,7 +70,7 @@ public class CalendarServiceImpl implements CalendarService{
 
     @Override
     public void completeTodo(int todoId) {
-        Todo todo= todoRepository.findById(todoId).orElseThrow(()->new IllegalArgumentException("no todo"));
+        Todo todo = todoRepository.findById(todoId).orElseThrow(() -> new IllegalArgumentException("no todo"));
         todo.updateTodoComplete();
     }
 
@@ -74,13 +81,60 @@ public class CalendarServiceImpl implements CalendarService{
 
     @Override
     public void updateTodo(int todoId, LocalDate todoDate, String todoContent, int categoryId) {
-        Todo todo= todoRepository.findById(todoId).orElseThrow(()->new IllegalArgumentException("no todo"));
-        Category category=categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("no category"));
+        Todo todo = todoRepository.findById(todoId).orElseThrow(() -> new IllegalArgumentException("no todo"));
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("no category"));
         todo.updateTodo(todoDate, todoContent, category);
     }
 
     @Override
     public void deleteTodo(int todoId) {
         todoRepository.deleteById(todoId);
+    }
+
+    @Override
+    public List<CommitResponseDTO> getCommit(User user, LocalDate date) throws JsonProcessingException {
+        String result = gitHubApi.getEvents(user.getUserLoginName());
+
+        List<CommitResponseDTO> commitResponseDTOList = new ArrayList<>();
+        if (result != null) {
+            JsonNode jsonNode = new ObjectMapper().readTree(result);
+
+            for (JsonNode node : jsonNode) {
+                if (node.get("type").asText().equals("PushEvent")) {
+                    String time = node.get("created_at").asText();
+                    Instant instant = Instant.parse(time);
+                    ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+                    LocalDateTime datetime = zonedDateTime.toLocalDateTime();
+
+                    if (datetime.toLocalDate().equals(date)) {
+                        String repoInfo[] = node.get("repo").get("name").asText().split("/");
+                        String repository = repoInfo[repoInfo.length - 1];
+
+                        Duration duration = Duration.between(datetime, LocalDateTime.now());
+                        if (duration.toHours() <= 24) {
+                            if (duration.toHours() > 0) {
+                                time = duration.toHours() + " hours ago";
+                            } else if (duration.toMinutes() > 0) {
+                                time = duration.toMinutes() + " minutes ago";
+                            } else {
+                                time = duration.toSeconds() + " seconds ago";
+                            }
+                        } else {
+                            Period period = Period.between(date, LocalDate.now());
+                            if (period.getYears() > 0) {
+                                time = period.getYears() + " years ago";
+                            } else if (period.getMonths() > 0) {
+                                time = period.getMonths() + " months ago";
+                            } else {
+                                time = period.getDays() + " days ago";
+                            }
+                        }
+                        String content = node.get("payload").get("commits").get(node.get("payload").get("commits").size() - 1).get("message").asText().split("\\n")[0];
+                        commitResponseDTOList.add(new CommitResponseDTO(repository, content, time));
+                    }
+                }
+            }
+        }
+        return commitResponseDTOList;
     }
 }
