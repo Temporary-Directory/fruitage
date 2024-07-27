@@ -6,7 +6,7 @@ import com.temporary_directory.fruitage.dto.request.FruitRequestDTO;
 import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
 import com.temporary_directory.fruitage.dto.response.UserFruitInfoResponseDTO;
 import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
-import com.temporary_directory.fruitage.dto.response.UserInfoResponseDTO;
+import com.temporary_directory.fruitage.dto.response.UserNameResponseDTO;
 import com.temporary_directory.fruitage.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -62,11 +62,11 @@ public class UserController {
     // user
     @GetMapping
     @ResponseStatus(code = HttpStatus.OK)
-    public UserInfoResponseDTO getUserName(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam("flag") boolean flag) {
+    public UserNameResponseDTO getUserName(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam("flag") boolean flag) {
         if (flag) {
-            return new UserInfoResponseDTO(principalDetails.getUser().getUserId(), principalDetails.getUser().getUserLoginName());
+            return new UserNameResponseDTO(principalDetails.getUser().getUserLoginName());
         } else {
-            return new UserInfoResponseDTO(principalDetails.getUser().getUserId(), principalDetails.getUser().getUserName());
+            return new UserNameResponseDTO(principalDetails.getUser().getUserName());
         }
     }
 }
