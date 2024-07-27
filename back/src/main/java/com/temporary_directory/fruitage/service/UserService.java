@@ -22,4 +22,6 @@ public interface UserService {
 
     UserInfoResponseDTO getUserInfo(User user) throws JsonProcessingException;
 
+    void deleteUser(User user);
+
 }

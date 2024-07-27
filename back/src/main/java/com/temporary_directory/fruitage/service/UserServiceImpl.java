@@ -28,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final AvatarRepository avatarRepository;
     private final UserFruitRepository userFruitRepository;
     private final TodoRepository todoRepository;
+    private final UserRepository userRepository;
     private final GitHubApi gitHubApi;
 
     @Override
@@ -113,6 +114,11 @@ public class UserServiceImpl implements UserService {
         int todo = todoRepository.countByUserAndTodoCompleteAndTodoDateBetween(user, true, LocalDate.now().withDayOfMonth(1), LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
 
         return new UserInfoResponseDTO(commit, todo);
+    }
+
+    @Override
+    public void deleteUser(User user) {
+        userRepository.delete(user);
     }
 
     public void createFruit(User user, Fruit fruit, boolean flag) {
