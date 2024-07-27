@@ -18,8 +18,9 @@ public class GitHubApi {
     }
 
     public String getEvents(String userName){
+
         URI uri = UriComponentsBuilder
-                .fromUriString("https://api.github.com/users/"+userName+ "/events")
+                .fromUriString("https://api.github.com/users/"+userName+ "/events?per_page=200")
                 .encode()
                 .build()
                 .toUri();
