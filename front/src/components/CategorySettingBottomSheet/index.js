@@ -116,7 +116,7 @@ const CategorySettingBottomSheet = ({ visible, setVisible, onClose }) => {
     try {
       const x_auth = await AsyncStorage.getItem("authToken");
       const url = `${CALENDAR_API_SERVER}/category/${pressedCategory.categoryId}`;
-      console.log(url);
+      // console.log(url);
 
       await axios({
         method: "delete",
