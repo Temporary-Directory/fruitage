@@ -14,6 +14,10 @@ import {
   ScrollView,
   Pressable,
 } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { CALENDAR_API_SERVER } from "../../Config";
 
 import CheckA from "../../assets/images/ic_check_aaa.png";
 import TrashA from "../../assets/images/ic_trash_aaa.png";
@@ -21,7 +25,7 @@ import CheckF from "../../assets/images/ic_check_fff.png";
 import Toggle from "../Toggle";
 import DeleteBottomSheet from "../DeleteBottomSheet";
 
-const CategorySettingBottomSheet = ({ visible, setVisible }) => {
+const CategorySettingBottomSheet = ({ visible, setVisible, onClose }) => {
   const [deleteBottomSheetVisible, setDeleteBottomSheetVisible] =
     useState(false);
 
@@ -42,20 +46,124 @@ const CategorySettingBottomSheet = ({ visible, setVisible }) => {
     "#444444",
   ];
 
-  useEffect(() => {
-    // TODO: [BE] GET /calendar/category
-    var retList = [
-      { categoryId: 0, categoryName: "Category-0", categoryColor: "#FF9798" },
-      { categoryId: 1, categoryName: "Category-1", categoryColor: "#D7F8FD" },
-      { categoryId: 2, categoryName: "Category-2", categoryColor: "#CEEE98" },
-      { categoryId: 3, categoryName: "Category-3", categoryColor: "#FDCEA0" },
-      { categoryId: 4, categoryName: "Category-4", categoryColor: "#DABEF6" },
-      { categoryId: 5, categoryName: "Category-5", categoryColor: "#FFE195" },
-      { categoryId: 6, categoryName: "Category-6", categoryColor: "#DEF7B2" },
-      { categoryId: 7, categoryName: "Category-7", categoryColor: "#AECAB2" },
-    ];
+  const createCategory = async () => {
+    // Post categories to BE
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/category`;
 
-    setCategories(retList);
+      await axios({
+        method: "post",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+        data: {
+          categoryName: newCategoryText,
+          categoryColor: "#F4F4F4",
+        },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            getCategories();
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching calendar's categories:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getCategories function:", error);
+    }
+  };
+
+  const updateCategory = async () => {
+    // Update categories to BE
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/category`;
+
+      await axios({
+        method: "put",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+        data: {
+          categoryId: pressedCategory.categoryId,
+          categoryName: pressedCategoryText,
+          categoryColor: pressedColor
+            ? colors[pressedColor]
+            : pressedCategory.categoryColor,
+        },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            setPressedCategory(null);
+            setPressedCategoryText(null);
+            setPressedColor(null);
+            getCategories();
+          }
+        })
+        .catch((error) => {
+          console.error("Error updating calendar's category:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in updateCategory function:", error);
+    }
+  };
+
+  const deleteCategory = async () => {
+    // Delete categories to BE
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/category/${pressedCategory.categoryId}`;
+      console.log(url);
+
+      await axios({
+        method: "delete",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            setDeleteBottomSheetVisible(false);
+            getCategories();
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting calendar's category:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in deleteCategory function:", error);
+    }
+  };
+
+  const getCategories = async () => {
+    // Get categories from BE
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/category`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          const categoryList = response.data;
+          setCategories(categoryList);
+        })
+        .catch((error) => {
+          console.error("Error fetching calendar's categories:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getCategories function:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Get /calendar/category from BE
+    getCategories();
   }, []);
 
   const screenHeight = Dimensions.get("screen").height;
@@ -102,6 +210,7 @@ const CategorySettingBottomSheet = ({ visible, setVisible }) => {
 
   const closeModal = () => {
     closeBottomSheet.start(() => {
+      onClose();
       setVisible(false);
     });
   };
@@ -171,7 +280,7 @@ const CategorySettingBottomSheet = ({ visible, setVisible }) => {
               <TouchableOpacity
                 activeOpacity={0.6}
                 onPress={() => {
-                  console.log("Create new category!!");
+                  createCategory();
                 }}
               >
                 <Image
@@ -193,21 +302,29 @@ const CategorySettingBottomSheet = ({ visible, setVisible }) => {
                   <Pressable
                     key={ir}
                     onPress={() => {
-                      if (pressedCategory === null || pressedCategory !== ir) {
-                        setPressedCategory(ir);
+                      if (
+                        pressedCategory === null ||
+                        (pressedCategory &&
+                          pressedCategory.categoryId !== cat.categoryId)
+                      ) {
+                        setPressedCategory(cat);
                         setPressedCategoryText(cat.categoryName);
                       } else {
                         setPressedColor(null);
                         setPressedCategory(null);
+                        setPressedCategoryText(null);
                       }
                     }}
                     style={({ pressed }) => [
                       styles.categoryOption,
                       pressed && styles.pressedCategoryOption,
-                      pressedCategory === ir && styles.pressedCategoryOption,
+                      pressedCategory &&
+                        pressedCategory.categoryId === cat.categoryId &&
+                        styles.pressedCategoryOption,
                     ]}
                   >
-                    {pressedCategory === ir ? (
+                    {pressedCategory &&
+                    pressedCategory.categoryId === cat.categoryId ? (
                       <>
                         <View
                           style={{
@@ -236,6 +353,16 @@ const CategorySettingBottomSheet = ({ visible, setVisible }) => {
                               borderRadius: 4,
                             }}
                           />
+                          <TouchableOpacity
+                            onPress={updateCategory}
+                            activeOpacity={0.6}
+                            style={{ marginRight: 5 }}
+                          >
+                            <Image
+                              style={{ width: 20, height: 20 }}
+                              source={CheckA}
+                            />
+                          </TouchableOpacity>
                           <TouchableOpacity
                             onPress={() => {
                               setDeleteBottomSheetVisible(true);
@@ -363,7 +490,7 @@ const CategorySettingBottomSheet = ({ visible, setVisible }) => {
         visible={deleteBottomSheetVisible}
         setVisible={setDeleteBottomSheetVisible}
         text={"카테고리를 삭제하시겠습니까?"}
-        func={() => console.log("delete category")}
+        func={deleteCategory}
       />
     </Modal>
   );
