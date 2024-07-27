@@ -17,24 +17,24 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException{
-        OAuth2User oAuth2User=super.loadUser(userRequest);
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        String registrationId=userRequest.getClientRegistration().getRegistrationId(); //Oauth name
-        OAuth2UserInfo userInfo=OAuth2UserInfo.of(registrationId, oAuth2User.getAttributes());
+        String registrationId = userRequest.getClientRegistration().getRegistrationId(); //Oauth name
+        OAuth2UserInfo userInfo = OAuth2UserInfo.of(registrationId, oAuth2User.getAttributes());
 
-        User user=userRepository.findByUserLoginName(userInfo.getLoginName());
-        if(user == null) { // sing up
+        User user = userRepository.findByUserLoginName(userInfo.getLoginName());
+        if (user == null) { // sign up
             user = User.builder()
                     .userLoginName(userInfo.getLoginName())
                     .userName(userInfo.getName())
                     .userEmail(userInfo.getEmail())
                     .build();
-        }else{
+            userRepository.save(user);
+            return new PrincipalDetails(user, userInfo.getAttributes(), true);
+        } else {
             user.updateRecentDate(LocalDateTime.now());
+            return new PrincipalDetails(user, userInfo.getAttributes(), false);
         }
-        userRepository.save(user);
-
-        return new PrincipalDetails(user, userInfo.getAttributes());
     }
 }
