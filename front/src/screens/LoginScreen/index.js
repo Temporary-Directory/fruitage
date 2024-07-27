@@ -14,25 +14,25 @@ import FruitBox from "../../assets/images/fruit-box.png";
 import CustomWebView from "../../components/CustomWebView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-function LoginScreen({ navigation, signedIn, setSignedIn }) {
+function LoginScreen({ navigation, signedIn, setSignedIn, setFlag }) {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const onSubmitLogin = () => {
-    console.log("Login Button is pressed!");
     setVisible(true);
   };
 
-  const handleAuthSuccess = async (d) => {
-    console.log("auth success", d); // Check response from CustomWebView
-    console.log(await AsyncStorage.getItem("authToken")); // Check authToken stored in AsyncStorage
+  const handleAuthSuccess = async (f) => {
+    // console.log("auth success", d); // Check response from CustomWebView
+    // console.log(await AsyncStorage.getItem("authToken")); // Check authToken stored in AsyncStorage
+    setFlag(f);
     setSignedIn(true);
     setVisible(false); // Hide CustomWebView when auth is successful
   };
 
-  const onSubmitSignUp = () => {
-    console.log("SignUp Button is pressed!");
-  };
+  // const onSubmitSignUp = () => {
+  //   console.log("SignUp Button is pressed!");
+  // };
 
   return (
     <View style={styles.container}>
@@ -55,7 +55,7 @@ function LoginScreen({ navigation, signedIn, setSignedIn }) {
               <AntDesign name="github" size={22} color="white" />
               <Text style={styles.btnTxt}>Github으로 로그인</Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={onSubmitSignUp}
               activeOpacity={0.8}
               style={styles.btnSignUp}
@@ -63,7 +63,7 @@ function LoginScreen({ navigation, signedIn, setSignedIn }) {
               <Text style={{ ...styles.btnTxt, color: "#aaaaaa" }}>
                 회원가입
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
       )}
