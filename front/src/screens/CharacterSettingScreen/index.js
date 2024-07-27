@@ -1,77 +1,164 @@
-import { View, Image, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Image,
+  Text,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  Animated,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { FontAwesome6, AntDesign } from "@expo/vector-icons";
+
+import { USER_API_SERVER } from "../../Config";
 
 import Bear from "../../assets/images/character-bear.png";
 import Tiger from "../../assets/images/character-tiger.png";
-import { useState } from "react";
+import Close3 from "../../assets/images/ic_close_333.png";
+import Check2 from "../../assets/images/ic_check_29.png";
 
-function CharacterSettingScreen() {
-  const [character, setCharacter] = useState(true); // true: bear, false: tiger
+function CharacterSettingScreen({ visible, setVisible, currentType, onClose }) {
+  const [character, setCharacter] = useState(currentType); // 1: bear, 2: tiger
 
-  const onSubmitCharacter = () => {
-    console.log(character ? "bear" : "tiger");
+  const onSubmitCharacter = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${USER_API_SERVER}/character`;
+
+      await axios({
+        method: "put",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+        data: { characterType: character },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            onClose(character);
+            setVisible(false);
+          }
+        })
+        .catch((error) => {
+          console.error("Error putting user's character:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in onSubmitCharacter function:", error);
+    }
   };
+
+  const screenHeight = Dimensions.get("screen").height;
+  const panY = useRef(new Animated.Value(screenHeight)).current;
+  const translateY = panY.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const resetBottomSheet = Animated.timing(panY, {
+    toValue: 0,
+    duration: 300,
+    useNativeDriver: true,
+  });
+
+  const closeBottomSheet = Animated.timing(panY, {
+    toValue: screenHeight,
+    duration: 300,
+    useNativeDriver: true,
+  });
+
+  useEffect(() => {
+    if (visible) {
+      resetBottomSheet.start();
+    }
+  }, [visible]);
+
+  const closeModal = () => {
+    closeBottomSheet.start(() => {
+      setVisible(false);
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}></View>
-      <View style={styles.body}>
-        <View style={styles.titleView}>
-          <Text style={styles.titleTxt}>캐릭터를</Text>
-          <Text style={styles.titleTxt}>선택해주세요.</Text>
-        </View>
-
-        <View style={styles.options}>
+    <Modal
+      visible={visible}
+      animationType={"fade"}
+      transparent
+      statusBarTranslucent
+    >
+      <Animated.View
+        style={{ ...styles.container, transform: [{ translateY: translateY }] }}
+      >
+        <View style={styles.header}>
+          <View style={{ flex: 1 }}></View>
           <TouchableOpacity
-            onPress={() => setCharacter(true)}
-            activeOpacity={0.8}
-            style={{
-              ...styles.checkCard,
-              backgroundColor: character ? "#f4f4f4" : "transparent",
-            }}
+            style={{ flex: 3 }}
+            onPress={closeModal}
+            activeOpacity={0.5}
           >
-            <View style={styles.checkCardView}>
-              <Image source={Bear} style={styles.img} />
-              {character ? (
-                <Text>
-                  <FontAwesome6 name="check" size={24} />
-                </Text>
-              ) : (
-                <View style={{ width: 24, height: 24 }}></View>
-              )}
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setCharacter(false)}
-            activeOpacity={0.8}
-            style={{
-              ...styles.checkCard,
-              backgroundColor: !character ? "#f4f4f4" : "transparent",
-            }}
-          >
-            <View style={styles.checkCardView}>
-              <Image source={Tiger} style={styles.img} />
-              {!character ? (
-                <FontAwesome6 name="check" size={24} color="black" />
-              ) : (
-                <View style={{ width: 24, height: 24 }}></View>
-              )}
-            </View>
+            <Image style={{ width: 24, height: 24 }} source={Close3} />
           </TouchableOpacity>
         </View>
+        <View style={styles.body}>
+          <View style={styles.titleView}>
+            <Text style={styles.titleTxt}>캐릭터를</Text>
+            <Text style={styles.titleTxt}>선택해주세요.</Text>
+          </View>
 
-        <TouchableOpacity
-          onPress={onSubmitCharacter}
-          activeOpacity={0.8}
-          style={styles.btnSave}
-        >
-          <Text style={styles.btnTxt}>저장</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.footer}>
-        <Text style={{ color: "#666" }}>홈에서 표시되는</Text>
-        <Text style={{ color: "#666" }}>캐릭터를 선택합니다.</Text>
-      </View>
-    </View>
+          <View style={styles.options}>
+            <TouchableOpacity
+              onPress={() => setCharacter(1)}
+              activeOpacity={0.8}
+              style={{
+                ...styles.checkCard,
+                backgroundColor: character === 1 ? "#f4f4f4" : "transparent",
+              }}
+            >
+              <View style={styles.checkCardView}>
+                <Image source={Bear} style={styles.img} />
+                {character === 1 ? (
+                  //   <FontAwesome6 name="check" size={24} />
+                  <Image style={{ width: 24, height: 24 }} source={Check2} />
+                ) : (
+                  <View style={{ width: 24, height: 24 }}></View>
+                )}
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setCharacter(2)}
+              activeOpacity={0.8}
+              style={{
+                ...styles.checkCard,
+                backgroundColor: character === 2 ? "#f4f4f4" : "transparent",
+              }}
+            >
+              <View style={styles.checkCardView}>
+                <Image source={Tiger} style={styles.img} />
+                {character === 2 ? (
+                  // <FontAwesome6 name="check" size={24} color="black" />
+                  <Image style={{ width: 24, height: 24 }} source={Check2} />
+                ) : (
+                  <View style={{ width: 24, height: 24 }}></View>
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            onPress={onSubmitCharacter}
+            activeOpacity={0.8}
+            style={styles.btnSave}
+          >
+            <Text style={styles.btnTxt}>저장</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.footer}>
+          <Text style={{ color: "#666" }}>홈에서 표시되는</Text>
+          <Text style={{ color: "#666" }}>캐릭터를 선택합니다.</Text>
+        </View>
+      </Animated.View>
+    </Modal>
   );
 }
 
@@ -86,7 +173,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 0.8,
-    backgroundColor: "yellow",
+    width: "100%",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
   },
   body: {
     flex: 2,
