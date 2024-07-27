@@ -83,8 +83,8 @@ function DictionaryScreen({ visible, setVisible }) {
   };
 
   useEffect(() => {
-    getFruitInfo();
-  }, []);
+    if (visible) getFruitInfo();
+  }, [visible]);
 
   const onPressFruit = (index) => {
     var newFruits = [...fruits];
@@ -224,7 +224,10 @@ function DictionaryScreen({ visible, setVisible }) {
                       )}
                     </View>
                     <View style={styles.cardView}>
-                      <Image source={MangoSteen} style={styles.img} />
+                      <Image
+                        source={{ uri: f.fruitImage }}
+                        style={styles.img}
+                      />
                       <Text style={styles.fruitName}>{f.fruitName}</Text>
                     </View>
                   </TouchableOpacity>
@@ -259,9 +262,12 @@ function DictionaryScreen({ visible, setVisible }) {
                         )}
                       </View>
                       <View style={styles.cardView}>
-                        <Image source={MangoSteen} style={styles.img} />
+                        <Image
+                          source={{ uri: fruits[i + 1].fruitImage }}
+                          style={styles.img}
+                        />
                         <Text style={styles.fruitName}>
-                          {fruits[i + 1].name}
+                          {fruits[i + 1].fruitName}
                         </Text>
                       </View>
                     </TouchableOpacity>
