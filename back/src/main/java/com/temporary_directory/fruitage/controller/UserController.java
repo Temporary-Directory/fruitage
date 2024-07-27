@@ -73,4 +73,10 @@ public class UserController {
     public UserInfoResponseDTO getUserInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) throws JsonProcessingException {
         return userService.getUserInfo(principalDetails.getUser());
     }
+
+    @DeleteMapping
+    @ResponseStatus(code= HttpStatus.OK)
+    public void deleteUser(@AuthenticationPrincipal PrincipalDetails principalDetails){
+        userService.deleteUser(principalDetails.getUser());
+    }
 }
