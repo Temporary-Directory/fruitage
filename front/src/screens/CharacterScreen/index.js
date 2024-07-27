@@ -1,17 +1,44 @@
+import { useState, useEffect, useRef } from "react";
 import { View, Image, Text, StyleSheet, TouchableOpacity } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome6 } from "@expo/vector-icons";
+
+import { USER_API_SERVER } from "../../Config";
 
 import Bear from "../../assets/images/character-bear.png";
 import Tiger from "../../assets/images/character-tiger.png";
-// import Check from "../../assets/images/check.png";
-import { useState } from "react";
+import Check2 from "../../assets/images/ic_check_29.png";
 
-function CharacterScreen() {
-  const [character, setCharacter] = useState(true); // true: bear, false: tiger
+function CharacterScreen({ setFlag }) {
+  const [character, setCharacter] = useState(1); // 1: bear, 2: tiger
 
-  const onSubmitCharacter = () => {
-    console.log(character ? "bear" : "tiger");
+  const onSubmitCharacter = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${USER_API_SERVER}/character`;
+
+      await axios({
+        method: "post",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+        data: { characterType: character },
+      })
+        .then((response) => {
+          if (response.status == 200) {
+            // console.log(typeof response.status);
+            setFlag(false);
+          }
+        })
+        .catch((error) => {
+          console.error("Error putting user's character:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in onSubmitCharacter function:", error);
+    }
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}></View>
@@ -23,19 +50,18 @@ function CharacterScreen() {
 
         <View style={styles.options}>
           <TouchableOpacity
-            onPress={() => setCharacter(true)}
+            onPress={() => setCharacter(1)}
             activeOpacity={0.8}
             style={{
               ...styles.checkCard,
-              backgroundColor: character ? "#f4f4f4" : "transparent",
+              backgroundColor: character === 1 ? "#f4f4f4" : "transparent",
             }}
           >
             <View style={styles.checkCardView}>
               <Image source={Bear} style={styles.img} />
-              {character ? (
-                <Text>
-                  <FontAwesome6 name="check" size={24} />
-                </Text>
+              {character === 1 ? (
+                //   <FontAwesome6 name="check" size={24} />
+                <Image style={{ width: 24, height: 24 }} source={Check2} />
               ) : (
                 // <FontAwesome6 name="check" size={24} color="black" />
                 <View style={{ width: 24, height: 24 }}></View>
@@ -43,17 +69,18 @@ function CharacterScreen() {
             </View>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setCharacter(false)}
+            onPress={() => setCharacter(2)}
             activeOpacity={0.8}
             style={{
               ...styles.checkCard,
-              backgroundColor: !character ? "#f4f4f4" : "transparent",
+              backgroundColor: character === 2 ? "#f4f4f4" : "transparent",
             }}
           >
             <View style={styles.checkCardView}>
               <Image source={Tiger} style={styles.img} />
-              {!character ? (
-                <FontAwesome6 name="check" size={24} color="black" />
+              {character === 2 ? (
+                // <FontAwesome6 name="check" size={24} color="black" />
+                <Image style={{ width: 24, height: 24 }} source={Check2} />
               ) : (
                 <View style={{ width: 24, height: 24 }}></View>
               )}

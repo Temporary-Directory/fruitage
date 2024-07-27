@@ -1,17 +1,12 @@
 import { View, TouchableOpacity, Image } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import SplashScreen from "./src/screens/SplashScreen";
 import CharacterScreen from "./src/screens/CharacterScreen";
 import LoginScreen from "./src/screens/LoginScreen";
-import CharacterSettingScreen from "./src/screens/CharacterSettingScreen";
-import NewFruitScreen from "./src/screens/NewFruitScreen";
-import DictionaryScreen from "./src/screens/DictionaryScreen";
 import CalendarScreen from "./src/screens/CalendarScreen";
 import MainScreen from "./src/screens/MainScreen";
 import SettingScreen from "./src/screens/SettingsScreen";
-
-import CustomWebView from "./src/components/CustomWebView";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -109,10 +104,19 @@ function TabBar({ state, descriptors, navigation }) {
 
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
+  const [flag, setFlag] = useState(false);
+
+  useEffect(() => {
+    console.log("signedIn:", signedIn);
+  }, [signedIn]);
+
+  useEffect(() => {
+    console.log("flag:", flag);
+  }, [flag]);
 
   return (
     <NavigationContainer>
-      {signedIn === true ? (
+      {signedIn === true && flag === false ? (
         <Tab.Navigator
           screenOptions={{
             headerShown: false,
@@ -125,27 +129,15 @@ export default function App() {
           <Tab.Screen name="Main" component={MainScreen} />
           <Tab.Screen name="Setting" component={SettingScreen} />
         </Tab.Navigator>
+      ) : flag === true ? (
+        <CharacterScreen setFlag={setFlag} />
       ) : (
-        <LoginScreen signedIn={signedIn} setSignedIn={setSignedIn} />
-        // <CharacterScreen />
+        <LoginScreen
+          signedIn={signedIn}
+          setSignedIn={setSignedIn}
+          setFlag={setFlag}
+        />
       )}
     </NavigationContainer>
   );
 }
-
-// <Stack.Navigator>
-// <Stack.Screen
-//     name="login"
-//     component={LoginScreen}
-//     options={({ navigation, signedIn, setSignedIn }) => ({
-//       // headerShown: false,
-//       title: "Login",
-//       headerLeft: () => (
-//         <TouchableOpacity onPress={() => navigation.openDrawer()}>
-//           {/* <Text>Drawer</Text> */}
-//         </TouchableOpacity>
-//       ),
-//     })}
-//   />
-//   <Stack.Screen name="Github OAuth" component={WebView} />
-// </Stack.Navigator>

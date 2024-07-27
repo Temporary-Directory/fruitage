@@ -32,13 +32,15 @@ const CustomWebView = ({ onAuthSuccess }) => {
     try {
       if (event.nativeEvent && event.nativeEvent.data) {
         if (event.nativeEvent.data.includes("accessToken=")) {
-          const accessToken = event.nativeEvent.data.split("accessToken=")[1];
+          const res = event.nativeEvent.data.split("; ");
+          const accessToken = res[0].split("accessToken=")[1];
+          const flag = res[1].split("flag=")[1] === "true" ? true : false;
+
           await AsyncStorage.setItem("authToken", accessToken);
 
-          // console.log("AccessToken:", accessToken);
           await AsyncStorage.setItem("authToken", accessToken);
-          const res = await AsyncStorage.getItem("authToken");
-          onAuthSuccess(res);
+          const x_auth = await AsyncStorage.getItem("authToken");
+          onAuthSuccess(flag);
         }
       }
     } catch (e) {
