@@ -21,18 +21,23 @@ import java.io.IOException;
 public class CustomOAuthSuccessHandler implements AuthenticationSuccessHandler {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        PrincipalDetails principalDetails= (PrincipalDetails) authentication.getPrincipal();
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-        User user=userRepository.findByUserLoginName(principalDetails.getPassword());
-        String accessToken= jwtTokenProvider.createToken(user.getUserLoginName());
+        User user = userRepository.findByUserLoginName(principalDetails.getPassword());
+        String accessToken = jwtTokenProvider.createToken(user.getUserLoginName());
 
-        Cookie accessCookie=new Cookie("accessToken", accessToken);
+        Cookie accessCookie = new Cookie("accessToken", accessToken);
+        Cookie flagCookie = new Cookie("flag", String.valueOf(principalDetails.isFlag()));
         accessCookie.setPath("/");
-        accessCookie.setMaxAge(60*60*2);
+        accessCookie.setMaxAge(60 * 60 * 2);
+        flagCookie.setPath("/");
+        flagCookie.setMaxAge(60 * 60 * 2);
 
         response.addCookie(accessCookie);
+        response.addCookie(flagCookie);
 
         response.setHeader("AccessToken", accessToken);
     }

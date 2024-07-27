@@ -14,14 +14,16 @@ import java.util.Map;
 public class PrincipalDetails implements OAuth2User, UserDetails {
     private User user;
     private Map<String, Object> attributes;
+    private boolean flag;
 
-    public PrincipalDetails(User user){
-        this.user=user;
+    public PrincipalDetails(User user) {
+        this.user = user;
     }
 
-    public PrincipalDetails(User user, Map<String, Object> attributes){
-        this.user=user;
-        this.attributes=attributes;
+    public PrincipalDetails(User user, Map<String, Object> attributes, boolean flag) {
+        this.user = user;
+        this.attributes = attributes;
+        this.flag = flag;
     }
 
     @Override
@@ -73,8 +75,8 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() { // 해당 user의 권한을 반환
-        Collection<GrantedAuthority> collection=new ArrayList<>();
-        collection.add((GrantedAuthority) ()-> "ROLE_USER");
+        Collection<GrantedAuthority> collection = new ArrayList<>();
+        collection.add((GrantedAuthority) () -> "ROLE_USER");
         return collection;
     }
 
