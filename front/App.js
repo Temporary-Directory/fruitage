@@ -17,6 +17,7 @@ import SettingW from "./src/assets/images/ic_setting_white.png";
 import SettingB from "./src/assets/images/ic_setting_black.png";
 import CalendarW from "./src/assets/images/ic_calendar_white.png";
 import CalendarB from "./src/assets/images/ic_calendar_black.png";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createBottomTabNavigator();
 
@@ -105,18 +106,42 @@ function TabBar({ state, descriptors, navigation }) {
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
   const [flag, setFlag] = useState(false);
+  const [splash, setSplash] = useState(false);
 
   useEffect(() => {
-    console.log("signedIn:", signedIn);
-  }, [signedIn]);
+    const checkSignInStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        const expirationTime = await AsyncStorage.getItem("authExpirationTime");
 
-  useEffect(() => {
-    console.log("flag:", flag);
-  }, [flag]);
+        if (token && expirationTime) {
+          const expirationTimeInt = parseInt(expirationTime, 10); // to Decimal integer
+          const currentTime = new Date().getTime();
+
+          if (currentTime > expirationTimeInt) {
+            // Handle token expiration, e.g., navigate to login screen
+            await AsyncStorage.removeItem("authToken");
+            await AsyncStorage.removeItem("authExpirationTime");
+          } else {
+            // Token is valid, proceed with your app's logic
+            setSignedIn(true);
+          }
+        }
+        setSplash(false);
+      } catch (error) {
+        console.error("Error retrieving the token:", error);
+      }
+    };
+
+    setSplash(true);
+    checkSignInStatus();
+  }, []);
 
   return (
     <NavigationContainer>
-      {signedIn === true && flag === false ? (
+      {splash ? (
+        <SplashScreen />
+      ) : signedIn === true && flag === false ? (
         <Tab.Navigator
           screenOptions={{
             headerShown: false,
@@ -127,7 +152,12 @@ export default function App() {
         >
           <Tab.Screen name="Calendar" component={CalendarScreen} />
           <Tab.Screen name="Main" component={MainScreen} />
-          <Tab.Screen name="Setting" component={SettingScreen} />
+          <Tab.Screen
+            name="Setting"
+            children={(props) => (
+              <SettingScreen {...props} setSignedIn={setSignedIn} />
+            )}
+          />
         </Tab.Navigator>
       ) : flag === true ? (
         <CharacterScreen setFlag={setFlag} />
