@@ -24,23 +24,20 @@ function CalendarScreen() {
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [bottomSheetEditVisible, setBottomSheetEditVisible] = useState(false);
 
-  const onCloseBottomSheet = () => {
-    setSelectedTodo(null);
-    setSelectedTodoCategory(null);
-    getTodos(selectedDate);
-  };
-
   const [mode, setMode] = useState(false); // false: commit mode, true: todo mode
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [selectedTodo, setSelectedTodo] = useState(null);
   const [selectedTodoCategory, setSelectedTodoCategory] = useState(null);
 
-  // temporary state
   const [commits, setCommits] = useState([]);
 
   const [categories, setCategories] = useState({});
   const [todos, setTodos] = useState([]);
+
+  // Display
+  const [days, setDays] = useState([]);
+  const [fruitImageURLs, setFruitImageURLs] = useState([]);
 
   const buildTodos = () => {
     const newTodos = {};
@@ -122,15 +119,17 @@ function CalendarScreen() {
           setCommits(response.data);
         })
         .catch((error) => {
-          console.error("Error fetching calendar's todo:", error);
+          console.error("Error fetching calendar's commit:", error);
         });
     } catch (error) {
       // Handle errors related to AsyncStorage or other issues here
-      console.error("Error in getTodos function:", error);
+      console.error("Error in getCommits function:", error);
     }
   };
 
   const getTodos = async () => {
+    await getCategories();
+
     // get todos from BE
     const date = formatDate(selectedDate);
 
@@ -169,7 +168,8 @@ function CalendarScreen() {
       })
         .then((response) => {
           if (response.status === 200) {
-            getTodos(selectedDate);
+            getTodos();
+            getCalendar();
           }
         })
         .catch((error) => {
@@ -181,24 +181,57 @@ function CalendarScreen() {
     }
   };
 
+  const getCalendar = async () => {
+    const [year, month] = formatDate(selectedDate).split("-");
+    const firstDate = `${year}-${month}-01`;
+
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}?flag=${
+        mode ? "todo" : "commit"
+      }&date=${firstDate}`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          // console.log(response.data.days);
+          if (response.status === 200) {
+            setDays(response.data.days);
+            setFruitImageURLs(response.data.fruitImage);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching calendar:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getCalendar function:", error);
+    }
+  };
+
   useEffect(() => {
     if (mode) {
-      getCategories();
+      // getCategories();
       getTodos();
     } else {
       getCommits();
     }
+    getCalendar();
   }, [mode, selectedDate]);
 
   useFocusEffect(
     useCallback(() => {
       // Action to perform when the screen is focused
       if (mode) {
-        getCategories();
+        // getCategories();
         getTodos();
       } else {
         getCommits();
       }
+      getCalendar();
 
       return () => {
         // Cleanup action if needed
@@ -206,6 +239,13 @@ function CalendarScreen() {
       };
     }, [])
   );
+
+  const onCloseBottomSheet = () => {
+    setSelectedTodo(null);
+    setSelectedTodoCategory(null);
+    getTodos();
+    // getCategories();
+  };
 
   return (
     <View style={styles.container}>
@@ -216,6 +256,8 @@ function CalendarScreen() {
           setMode={onPressMode}
           selectedDate={selectedDate}
           onSelectedDate={setSelectedDate}
+          days={days}
+          fruitImageURLs={fruitImageURLs}
         />
         <View style={{ flex: 1, width: "100%", paddingHorizontal: 24 }}>
           <Text

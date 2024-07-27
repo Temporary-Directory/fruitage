@@ -1,12 +1,27 @@
 import { View, Image, Text, StyleSheet, TouchableOpacity } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // import { FontAwesome6, AntDesign } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { CALENDAR_API_SERVER } from "../../Config";
+
 import ToggleSwitch from "../ToggleSwitch";
 import Blueberry from "../../assets/images/fruits/blueberry.png";
 import Left from "../../assets/images/ic_left.png";
 import Right from "../../assets/images/ic_right.png";
 
-const Calendar = ({ mode, setMode, selectedDate, onSelectedDate }) => {
+const empty =
+  "https://firebasestorage.googleapis.com/v0/b/fruitage-fd177.appspot.com/o/fruit%2Fempty.png?alt=media";
+
+const Calendar = ({
+  mode,
+  setMode,
+  selectedDate,
+  onSelectedDate,
+  days,
+  fruitImageURLs,
+}) => {
   const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [today, setToday] = useState(new Date()); // fixed real today date
@@ -102,10 +117,15 @@ const Calendar = ({ mode, setMode, selectedDate, onSelectedDate }) => {
 
   const calendarDays = buildCalendarDays();
 
+  let fIndex = -1;
   const build1Week = (week, i) => {
     return (
       <View key={i} style={styles.week}>
         {week.map((date, i) => {
+          if (days[date.getDate()]) {
+            fIndex++;
+          }
+
           return (
             <TouchableOpacity
               key={i}
@@ -149,7 +169,11 @@ const Calendar = ({ mode, setMode, selectedDate, onSelectedDate }) => {
                   width: 38,
                   height: 38,
                 }}
-                source={Blueberry} // 받아온 정보로 source만 변경
+                source={{
+                  uri: days[date.getDate()]
+                    ? fruitImageURLs[fIndex % fruitImageURLs.length]
+                    : empty,
+                }} // 받아온 정보로 source만 변경
               />
             </TouchableOpacity>
           );
@@ -162,32 +186,36 @@ const Calendar = ({ mode, setMode, selectedDate, onSelectedDate }) => {
     <View style={styles.calendar}>
       <View style={styles.titleView}>
         <View style={styles.yearMonth}>
-          <TouchableOpacity onPress={onPrev} activeOpacity={0.6}>
-            {/* <AntDesign name="left" size={24} color="#D9D9D9" /> */}
-            <Image
-              style={{
-                width: 24,
-                height: 24,
-              }}
-              source={Left}
-            />
-          </TouchableOpacity>
+          {mode && (
+            <TouchableOpacity onPress={onPrev} activeOpacity={0.6}>
+              {/* <AntDesign name="left" size={24} color="#D9D9D9" /> */}
+              <Image
+                style={{
+                  width: 24,
+                  height: 24,
+                }}
+                source={Left}
+              />
+            </TouchableOpacity>
+          )}
           <Text style={styles.titleTxt}>
             {currentMonth.getFullYear()}.
             {currentMonth.getMonth() + 1 < 10
               ? "0" + (currentMonth.getMonth() + 1).toString()
               : currentMonth.getMonth() + 1}
           </Text>
-          <TouchableOpacity onPress={onNext} activeOpacity={0.6}>
-            {/* <AntDesign name="right" size={24} color="#D9D9D9" /> */}
-            <Image
-              style={{
-                width: 24,
-                height: 24,
-              }}
-              source={Right}
-            />
-          </TouchableOpacity>
+          {mode && (
+            <TouchableOpacity onPress={onNext} activeOpacity={0.6}>
+              {/* <AntDesign name="right" size={24} color="#D9D9D9" /> */}
+              <Image
+                style={{
+                  width: 24,
+                  height: 24,
+                }}
+                source={Right}
+              />
+            </TouchableOpacity>
+          )}
         </View>
         <ToggleSwitch onToggle={() => setMode(!mode)} isOn={mode} />
       </View>
