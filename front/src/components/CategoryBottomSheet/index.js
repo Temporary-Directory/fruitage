@@ -12,6 +12,11 @@ import {
   PanResponder,
   ScrollView,
 } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { CALENDAR_API_SERVER } from "../../Config";
+
 import SettingA from "../../assets/images/ic_setting_aaa.png";
 import CategorySettingBottomSheet from "../CategorySettingBottomSheet";
 
@@ -22,33 +27,49 @@ const CategoryBottomSheet = ({ visible, setVisible, setSelected }) => {
     setCategorySettingBottomSheetVisible,
   ] = useState(false);
 
-  useEffect(() => {
-    // TODO: [BE] GET /calendar/category
-    var retList = [
-      { categoryId: 0, categoryName: "Category-0", categoryColor: "#FF9798" },
-      { categoryId: 1, categoryName: "Category-1", categoryColor: "#D7F8FD" },
-      { categoryId: 2, categoryName: "Category-2", categoryColor: "#CEEE98" },
-      { categoryId: 3, categoryName: "Category-3", categoryColor: "#FDCEA0" },
-      { categoryId: 4, categoryName: "Category-4", categoryColor: "#DABEF6" },
-      { categoryId: 5, categoryName: "Category-5", categoryColor: "#FFE195" },
-      { categoryId: 6, categoryName: "Category-6", categoryColor: "#DEF7B2" },
-    ];
+  const getCategories = async () => {
+    // get categories from BE
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/category`;
 
-    var formattedCategories = [];
-    for (var i = 0; i < retList.length; i += 3) {
-      var tmp = [];
-      for (var j = 0; j < 3; j++) {
-        if (i + j < retList.length) {
-          tmp.push(retList[i + j]);
-        } else {
-          tmp.push(null);
-        }
-      }
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          const categoryList = response.data;
 
-      formattedCategories.push(tmp);
+          // Format Categories to [nx3]
+          var formattedCategories = [];
+          for (var i = 0; i < categoryList.length; i += 3) {
+            var tmp = [];
+            for (var j = 0; j < 3; j++) {
+              if (i + j < categoryList.length) {
+                tmp.push(categoryList[i + j]);
+              } else {
+                tmp.push(null);
+              }
+            }
+
+            formattedCategories.push(tmp);
+          }
+
+          setCategories(formattedCategories);
+        })
+        .catch((error) => {
+          console.error("Error fetching calendar's categories:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getCategories function:", error);
     }
+  };
 
-    setCategories(formattedCategories);
+  useEffect(() => {
+    // [BE] GET /calendar/category
+    getCategories();
   }, []);
 
   const screenHeight = Dimensions.get("screen").height;
@@ -196,6 +217,7 @@ const CategoryBottomSheet = ({ visible, setVisible, setSelected }) => {
       <CategorySettingBottomSheet
         visible={categorySettingBottomSheetVisible}
         setVisible={setCategorySettingBottomSheetVisible}
+        onClose={getCategories}
       />
     </Modal>
   );
