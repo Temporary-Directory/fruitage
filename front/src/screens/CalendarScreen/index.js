@@ -6,58 +6,50 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
+import { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import axios from "axios";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import Todo from "../../assets/icons/ic_todo.png";
 import TodoUn from "../../assets/icons/ic_todo-un.png";
 import Plus from "../../assets/images/ic_plus.png";
 
 import Calendar from "../../components/Calendar";
-// import BottomSheet from "../../components/BottomSheet";
 import TodoBottomSheet from "../../components/TodoBottomSheet";
+import { CALENDAR_API_SERVER } from "../../Config";
 
 function CalendarScreen() {
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [bottomSheetEditVisible, setBottomSheetEditVisible] = useState(false);
 
   const onCloseBottomSheet = () => {
-    console.log("BottomSheet Closed!");
+    setSelectedTodo(null);
+    setSelectedTodoCategory(null);
+    getTodos(selectedDate);
   };
 
   const [mode, setMode] = useState(false); // false: commit mode, true: todo mode
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  const [selectedTodo, setSelectedTodo] = useState(null);
+  const [selectedTodoCategory, setSelectedTodoCategory] = useState(null);
+
   // temporary state
-  const [commits, setCommits] = useState([
-    { repository: "repository1", content: "hello world", elapsed: 60 },
-    { repository: "repository2", content: "Update README.md", elapsed: 1200 },
-    { repository: "repository3", content: "Delete .gitignore", elapsed: 120 },
-    { repository: "repository4", content: "I'm working!", elapsed: 180 },
-    { repository: "repository5", content: "Initialize", elapsed: 480 },
-  ]);
+  const [commits, setCommits] = useState([]);
 
-  const categories = [
-    { name: "category1", color: "#caec8f" },
-    { name: "category2", color: "#fcca98" },
-    { name: "category3", color: "#FFE195" },
-  ];
-
-  const [todos, setTodos] = useState([
-    { category: 0, content: "할일 목록1", done: true },
-    { category: 0, content: "끝내주게 숨쉬기", done: true },
-    { category: 1, content: "끝내주는 저녁 먹기", done: false },
-    { category: 1, content: "멋진 코딩하기", done: true },
-    // { category: 2, content: "낮잠 안 자기", done: false },
-  ]);
+  const [categories, setCategories] = useState({});
+  const [todos, setTodos] = useState([]);
 
   const buildTodos = () => {
     const newTodos = {};
 
     todos.map((todo, i) => {
-      if (todo.category in newTodos) {
-        newTodos[todo.category].push({ ...todo });
+      if (todo.todoCategory in newTodos) {
+        newTodos[todo.todoCategory].push({ ...todo });
       } else {
-        newTodos[todo.category] = [{ ...todo }];
+        newTodos[todo.todoCategory] = [{ ...todo }];
       }
     });
 
@@ -67,27 +59,153 @@ function CalendarScreen() {
   const formattedTodos = buildTodos();
 
   const onPressMode = () => {
-    // if (mode) { getCommits(); }
-    // else { getTodos(); }
-
     setMode(!mode);
   };
 
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   const getCategories = async () => {
-    // TODO: get categories from BE
+    // get categories from BE
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/category`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          const categoryList = response.data;
+
+          // Format Categories
+          const obj = {};
+          categoryList.map((cat, i) => {
+            obj[cat.categoryName] = {
+              categoryName: cat.categoryName,
+              categoryId: cat.categoryId,
+              categoryColor: cat.categoryColor,
+            };
+          });
+
+          setCategories(obj);
+        })
+        .catch((error) => {
+          console.error("Error fetching calendar's categories:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getCategories function:", error);
+    }
   };
 
   const getCommits = async () => {
-    // TODO: get commits from BE
-    // selectedDate
-    // setCommits
+    // Tget commits from BE
+    const date = formatDate(selectedDate);
+
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/commit?date=${date}`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          setCommits(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching calendar's todo:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getTodos function:", error);
+    }
   };
 
   const getTodos = async () => {
-    // TODO: get todos from BE
-    // selectedDate
-    // setTodos
+    // get todos from BE
+    const date = formatDate(selectedDate);
+
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/todo?date=${date}`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          // console.log("todos:", response.data); // response.data: []
+          setTodos(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching calendar's todo:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getTodos function:", error);
+    }
   };
+
+  const completeTodo = async (todoId) => {
+    // complete/Incomplete todo from BE
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/todo/${todoId}`;
+
+      await axios({
+        method: "put",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            getTodos(selectedDate);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching calendar's todo:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getTodos function:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (mode) {
+      getCategories();
+      getTodos();
+    } else {
+      getCommits();
+    }
+  }, [mode, selectedDate]);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Action to perform when the screen is focused
+      if (mode) {
+        getCategories();
+        getTodos();
+      } else {
+        getCommits();
+      }
+
+      return () => {
+        // Cleanup action if needed
+        // action when the screen is unfocused
+      };
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -97,7 +215,7 @@ function CalendarScreen() {
           mode={mode}
           setMode={onPressMode}
           selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
+          onSelectedDate={setSelectedDate}
         />
         <View style={{ flex: 1, width: "100%", paddingHorizontal: 24 }}>
           <Text
@@ -121,12 +239,10 @@ function CalendarScreen() {
                       <View
                         style={{
                           ...styles.todoCategory,
-                          backgroundColor: categories[cat].color,
+                          backgroundColor: categories[cat].categoryColor,
                         }}
                       >
-                        <Text style={styles.todoCategoryTxt}>
-                          {categories[cat].name}
-                        </Text>
+                        <Text style={styles.todoCategoryTxt}>{cat}</Text>
                       </View>
                       <View stlye={styles.todoList}>
                         {formattedTodos[cat].map((todo, i) => {
@@ -134,7 +250,7 @@ function CalendarScreen() {
                             <View key={i} style={styles.todoLeft}>
                               <TouchableOpacity
                                 onPress={() => {
-                                  console.log("TODO: check vs. unchecked");
+                                  completeTodo(todo.todoId);
                                 }}
                                 activeOpacity={0.7}
                               >
@@ -143,22 +259,21 @@ function CalendarScreen() {
                                     width: 13,
                                     height: 13,
                                   }}
-                                  source={todo.done ? Todo : TodoUn}
+                                  source={todo.todoComplete ? Todo : TodoUn}
                                 />
-                                {/* <FontAwesome
-                                  name={todo.done ? "check-square" : "square"}
-                                  size={15}
-                                  color={todo.done ? "#B66FFF" : "#efefef"}
-                                /> */}
                               </TouchableOpacity>
                               <TouchableOpacity
                                 onPress={() => {
                                   setBottomSheetEditVisible(true);
+                                  setSelectedTodo(todo);
+                                  setSelectedTodoCategory(
+                                    categories[todo.todoCategory]
+                                  );
                                 }}
                                 activeOpacity={0.8}
                               >
                                 <Text style={styles.todoContentTxt}>
-                                  {todo.content}
+                                  {todo.todoContent}
                                 </Text>
                               </TouchableOpacity>
                             </View>
@@ -183,9 +298,7 @@ function CalendarScreen() {
                         </Text>
                       </View>
 
-                      <Text style={styles.commitElapsed}>
-                        {commit.elapsed} seconds ago
-                      </Text>
+                      <Text style={styles.commitTime}>{commit.time}</Text>
                     </View>
                   );
                 })}
@@ -235,9 +348,9 @@ function CalendarScreen() {
         visible={bottomSheetEditVisible}
         setVisible={setBottomSheetEditVisible}
         create={false}
-        onClose={() => {
-          console.log("Delete todo button pressed");
-        }}
+        todo={selectedTodo}
+        category={selectedTodoCategory}
+        onClose={onCloseBottomSheet}
         date={selectedDate}
       />
     </View>
@@ -309,7 +422,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "black",
   },
-  commitElapsed: {
+  commitTime: {
     fontSize: 6,
     color: "#ababab",
   },
