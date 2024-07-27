@@ -1,13 +1,157 @@
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import { useEffect, useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import ToggleSwitch from "../../components/ToggleSwitch";
-import { useState } from "react";
+import { USER_API_SERVER } from "../../Config";
+import CharacterSettingScreen from "../CharacterSettingScreen";
+import DictionaryScreen from "../DictionaryScreen";
 
 function SettingScreen() {
-  const [email, setEmail] = useState("email@email.com"); // get user-email from local storage
-  const [nCommits, setNCommits] = useState(4); // get total number of commits from BE
-  const [nDone, setNDone] = useState(44); // get total number of done-toto from BE
-  const [character, setCharacter] = useState("호랭이"); // get selected character name from BE
-  const [nFruits, setNFruits] = useState(4); // get the number available fruits from BE
+  const [characterSettingScreenVisible, setCharacterSettingScreenVisible] =
+    useState(false);
+  const [dictionaryScreenVisible, setDictionaryScreenVisible] = useState(false);
+
+  const [username, setUsername] = useState("username"); // get user-email from local storage
+  const [nCommits, setNCommits] = useState(0); // get total number of commits from BE
+  const [nComplete, setNComplete] = useState(0); // get total number of done-toto from BE
+  const [characterType, setCharacterType] = useState(1); // get selected character name from BE
+  const [characterName, setCharacterName] = useState("곰"); // get selected character name from BE
+  const [nFruits, setNFruits] = useState(0); // get the number available fruits from BE
+
+  const onCloseCharacterSettingScreen = (nType) => {
+    setCharacterType(nType);
+    setCharacterName(nType === 1 ? "곰" : "호랑이");
+  };
+
+  const onCloseDictionaryScreen = () => {
+    console.log("DictionaryScreenVisible Closed!");
+  };
+
+  const getUsername = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${USER_API_SERVER}/?flag=true`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            setUsername(response.data.userName);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user's name:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getUsername function:", error);
+    }
+    return "";
+  };
+
+  const getUserInfo = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${USER_API_SERVER}/info`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            setNCommits(response.data.commit);
+            setNComplete(response.data.todo);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user's info:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getUserInfo function:", error);
+    }
+  };
+
+  const getUserFruit = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${USER_API_SERVER}/fruit`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          setNFruits(response.data.fruit);
+        })
+        .catch((error) => {
+          console.error("Error fetching today's todo data:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getTodayTodo function:", error);
+    }
+  };
+
+  const getUserCharacter = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${USER_API_SERVER}/character`;
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          setCharacterType(response.data.characterType);
+          setCharacterName(response.data.characterName);
+        })
+        .catch((error) => {
+          console.error("Error fetching user's character:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getUserCharacter function:", error);
+    }
+  };
+
+  useEffect(() => {
+    getUsername();
+    getUserInfo();
+    getUserFruit();
+    getUserCharacter();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Action to perform when the screen is focused
+      getUsername();
+      getUserInfo();
+      getUserFruit();
+      getUserCharacter();
+
+      return () => {
+        // Cleanup action if needed
+        // action when the screen is unfocused
+      };
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -16,6 +160,7 @@ function SettingScreen() {
         <View style={styles.titleView}>
           <Text style={styles.titleTxt}>설정</Text>
         </View>
+
         <View style={styles.boxContainer}>
           <Text style={styles.subTitle}>로그인 정보</Text>
           <View style={styles.box}>
@@ -49,7 +194,7 @@ function SettingScreen() {
                   activeOpacity={0.8}
                 >
                   <Text style={{ fontSize: 14, color: "#292929" }}>
-                    {email}
+                    {username}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -67,12 +212,12 @@ function SettingScreen() {
           <Text style={styles.subTitle}>내 기록</Text>
           <View style={styles.halfBoxView}>
             <View style={styles.halfBox}>
-              <Text style={styles.halfBoxTitle}>총 커밋 수</Text>
+              <Text style={styles.halfBoxTitle}>이 달의 커밋</Text>
               <Text style={styles.halfBoxTxt}>{nCommits}개</Text>
             </View>
             <View style={styles.halfBox}>
-              <Text style={styles.halfBoxTitle}>총 완료 할 일 수</Text>
-              <Text style={styles.halfBoxTxt}>{nDone}개</Text>
+              <Text style={styles.halfBoxTitle}>이 달의 완료 할 일</Text>
+              <Text style={styles.halfBoxTxt}>{nComplete}개</Text>
             </View>
           </View>
         </View>
@@ -81,7 +226,7 @@ function SettingScreen() {
           <View style={styles.halfBoxView}>
             <View style={styles.halfBox}>
               <Text style={styles.halfBoxTitle}>캐릭터</Text>
-              <Text style={styles.halfBoxTxt}>{character}</Text>
+              <Text style={styles.halfBoxTxt}>{characterName}</Text>
               <View
                 style={{
                   width: "100%",
@@ -93,7 +238,7 @@ function SettingScreen() {
               >
                 <TouchableOpacity
                   onPress={() => {
-                    console.log("Open CharacterSettingScreen");
+                    setCharacterSettingScreenVisible(true);
                   }}
                   style={{
                     paddingVertical: 4,
@@ -122,7 +267,7 @@ function SettingScreen() {
               >
                 <TouchableOpacity
                   onPress={() => {
-                    console.log("Open DictionaryScreen");
+                    setDictionaryScreenVisible(true);
                   }}
                   style={{
                     paddingVertical: 4,
@@ -214,6 +359,17 @@ function SettingScreen() {
           </View>
         </View>
       </View>
+      <CharacterSettingScreen
+        visible={characterSettingScreenVisible}
+        setVisible={setCharacterSettingScreenVisible}
+        currentType={characterType}
+        onClose={onCloseCharacterSettingScreen}
+      />
+      <DictionaryScreen
+        visible={dictionaryScreenVisible}
+        setVisible={setDictionaryScreenVisible}
+        onClose={onCloseDictionaryScreen}
+      />
     </View>
   );
 }
