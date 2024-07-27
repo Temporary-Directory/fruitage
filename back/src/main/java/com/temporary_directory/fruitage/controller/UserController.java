@@ -1,12 +1,10 @@
 package com.temporary_directory.fruitage.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.temporary_directory.fruitage.config.oauth.PrincipalDetails;
 import com.temporary_directory.fruitage.dto.request.CharacterRequestDTO;
 import com.temporary_directory.fruitage.dto.request.FruitRequestDTO;
-import com.temporary_directory.fruitage.dto.response.FruitInfoResponseDTO;
-import com.temporary_directory.fruitage.dto.response.UserFruitInfoResponseDTO;
-import com.temporary_directory.fruitage.dto.response.FruitResponseDTO;
-import com.temporary_directory.fruitage.dto.response.UserNameResponseDTO;
+import com.temporary_directory.fruitage.dto.response.*;
 import com.temporary_directory.fruitage.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -68,5 +66,11 @@ public class UserController {
         } else {
             return new UserNameResponseDTO(principalDetails.getUser().getUserName());
         }
+    }
+
+    @GetMapping("/info")
+    @ResponseStatus(code = HttpStatus.OK)
+    public UserInfoResponseDTO getUserInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) throws JsonProcessingException {
+        return userService.getUserInfo(principalDetails.getUser());
     }
 }
