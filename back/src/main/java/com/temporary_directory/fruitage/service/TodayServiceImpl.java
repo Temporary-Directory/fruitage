@@ -25,15 +25,16 @@ import java.util.Collections;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class TodayServiceImpl implements TodayService{
+public class TodayServiceImpl implements TodayService {
     private final TodoRepository todoRepository;
     private final UserAvatarRepository userAvatarRepository;
     private final GitHubApi gitHubApi;
+
     @Override
     public TodayTodoResponseDTO getTodoCount(User user) {
-        LocalDate date= LocalDate.now();
+        LocalDate date = LocalDate.now();
         int complete = todoRepository.countByUserAndTodoDateAndTodoComplete(user, date, true);
-        int incomplete= todoRepository.countByUserAndTodoDateAndTodoComplete(user, date, false);
+        int incomplete = todoRepository.countByUserAndTodoDateAndTodoComplete(user, date, false);
 
         return new TodayTodoResponseDTO(complete, incomplete);
     }
@@ -42,35 +43,35 @@ public class TodayServiceImpl implements TodayService{
     public TodayCommitResponseDTO getCommitCount(String name) throws JsonProcessingException {
         String result = gitHubApi.getEvents(name);
 
-        if(result != null){
+        if (result != null) {
             JsonNode jsonNode = new ObjectMapper().readTree(result);
 
-            int commit=0, days=0;
-            ArrayList<LocalDate> list =new ArrayList<>();
-            for(JsonNode node: jsonNode){
-                if(node.get("type").asText().equals("PushEvent")){
-                    String str= node.get("created_at").asText();
+            int commit = 0, days = 0;
+            ArrayList<LocalDate> list = new ArrayList<>();
+            for (JsonNode node : jsonNode) {
+                if (node.get("type").asText().equals("PushEvent")) {
+                    String str = node.get("created_at").asText();
                     Instant instant = Instant.parse(str);
                     ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
                     LocalDate date = zonedDateTime.toLocalDate();
 
-                    if(!list.contains(date))
+                    if (!list.contains(date))
                         list.add(date);
-                    if(date.isEqual(LocalDate.now())){
-                        commit+=1;
+                    if (date.isEqual(LocalDate.now())) {
+                        commit += 1;
                     }
                 }
             }
 
-            if(commit > 0){
+            if (commit > 0) {
                 Collections.sort(list, Collections.reverseOrder());
 
                 LocalDate temp = LocalDate.now();
-                for(LocalDate date : list){
-                    if(date.equals(temp)) {
+                for (LocalDate date : list) {
+                    if (date.equals(temp)) {
                         temp = date.minusDays(1);
-                        days+=1;
-                    }else{
+                        days += 1;
+                    } else {
                         break;
                     }
                 }
@@ -82,26 +83,39 @@ public class TodayServiceImpl implements TodayService{
 
     @Override
     public TodayStatusResponseDTO getTodayStatus(User user) throws JsonProcessingException {
+
         UserAvatar userAvatar = userAvatarRepository.findByUser(user);
         TodayStatusResponseDTO todayStatusResponseDTO = new TodayStatusResponseDTO(userAvatar);
 
+        if (!(userAvatar.getRecentDate().getYear() == LocalDate.now().getYear() && userAvatar.getRecentDate().getMonth() == LocalDate.now().getMonth())) {
+            userAvatar.updateFruitGauge(0);
+        }
+        userAvatar.updateRecentDate(LocalDate.now());
+
         // gauge = todoComplete + commit
-        int todoCount = todoRepository.countByUserAndTodoComplete(user, true);
+        int todoCount = todoRepository.countByUserAndTodoCompleteAndTodoDateBetween(user, true, LocalDate.now().withDayOfMonth(1), LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
 
         String result = gitHubApi.getEvents(user.getUserLoginName());
-        int commitCount=0;
-        if(result != null){
+        int commitCount = 0;
+        if (result != null) {
             JsonNode jsonNode = new ObjectMapper().readTree(result);
-            ArrayList<LocalDate> list =new ArrayList<>();
-            for(JsonNode node: jsonNode){
-                if(node.get("type").asText().equals("PushEvent")){
-                    commitCount+=1;
+            for (JsonNode node : jsonNode) {
+                if (node.get("type").asText().equals("PushEvent")) {
+                    String time = node.get("created_at").asText();
+                    Instant instant = Instant.parse(time);
+                    ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+                    LocalDate localDate = zonedDateTime.toLocalDate();
+
+                    if (localDate.isAfter(LocalDate.now().withDayOfMonth(1).minusDays(1)) && localDate.isBefore(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()).plusDays(1))) {
+                        commitCount += 1;
+                    }
                 }
             }
         }
-        commitCount = Math.max(userAvatar.getFruitGauge(), todoCount+commitCount);
+
+        commitCount = Math.max(userAvatar.getFruitGauge(), todoCount + commitCount);
         userAvatar.updateFruitGauge(commitCount);
-        todayStatusResponseDTO.setUserFruitGauge(30 - (commitCount%30));
+        todayStatusResponseDTO.setUserFruitGauge(30 - (commitCount % 30));
         return todayStatusResponseDTO;
     }
 }

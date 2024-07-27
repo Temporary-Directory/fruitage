@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
                 .user(user)
                 .fruit(fruit)
                 .fruitGauge(0)
+                .recentDate(LocalDate.now())
                 .avatar(avatar)
                 .build();
         userAvatarRepository.save(userAvatar);
