@@ -12,18 +12,33 @@ import {
   Dimensions,
   PanResponder,
 } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
+
+import { CALENDAR_API_SERVER } from "../../Config";
+
 import CategoryBottomSheet from "../CategoryBottomSheet";
 import Close3 from "../../assets/images/ic_close_333.png";
 import Trash3 from "../../assets/images/ic_trash_333.png";
 import DeleteBottomSheet from "../DeleteBottomSheet";
 
-const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
+const TodoBottomSheet = ({
+  visible,
+  setVisible,
+  create,
+  onClose,
+  date,
+  todo,
+  category,
+}) => {
   const [categoryBottomSheetVisible, setCategoryBottomSheetVisible] =
     useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [deleteBottomSheetVisible, setDeleteBottomSheetVisible] =
     useState(false);
+
+  const [content, setContent] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const screenHeight = Dimensions.get("screen").height;
   const panY = useRef(new Animated.Value(screenHeight)).current;
@@ -69,8 +84,115 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
 
   const closeModal = () => {
     closeBottomSheet.start(() => {
+      if (onClose) onClose();
+      setContent("");
+      setSelectedCategory(null);
       setVisible(false);
     });
+  };
+
+  useEffect(() => {
+    if (todo) {
+      setContent(todo.todoContent);
+      setSelectedCategory(category);
+    }
+  }, [todo]);
+
+  const onSubmitHandler = async () => {
+    // Create a new to-do
+    if (create) {
+      if (content === "") {
+        console.log("Content is empty.");
+        return;
+      }
+      if (selectedCategory === null) {
+        console.log("Category not selected.");
+        return;
+      }
+
+      try {
+        const x_auth = await AsyncStorage.getItem("authToken");
+        const url = `${CALENDAR_API_SERVER}/todo`;
+
+        await axios({
+          method: "post",
+          url: url,
+          headers: { Authorization: `Bearer ${x_auth}` },
+          data: {
+            todoDate: `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+            ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+            todoContent: content,
+            categoryId: selectedCategory.categoryId,
+          },
+        })
+          .then((response) => {
+            if (response.status === 200) {
+              closeModal();
+            }
+          })
+          .catch((error) => {
+            console.error("Error creating calendar's todo:", error);
+          });
+      } catch (error) {
+        // Handle errors related to AsyncStorage or other issues here
+        console.error("Error in onSubmitHandler (Create) function:", error);
+      }
+    } else {
+      // update todo from BE
+      try {
+        const x_auth = await AsyncStorage.getItem("authToken");
+        const url = `${CALENDAR_API_SERVER}/todo`;
+
+        await axios({
+          method: "put",
+          url: url,
+          headers: { Authorization: `Bearer ${x_auth}` },
+          data: {
+            todoId: todo.todoId,
+            todoDate: todo.todoDate,
+            todoContent: content,
+            categoryId: selectedCategory.categoryId,
+          },
+        })
+          .then((response) => {
+            if (response.status === 200) {
+              closeModal();
+            }
+          })
+          .catch((error) => {
+            console.error("Error updating calendar's todo:", error);
+          });
+      } catch (error) {
+        // Handle errors related to AsyncStorage or other issues here
+        console.error("Error in onSubmitHandler (Update) function:", error);
+      }
+    }
+  };
+
+  const onDeleteHandler = async () => {
+    // delete todo from BE
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${CALENDAR_API_SERVER}/todo/${todo.todoId}`;
+
+      await axios({
+        method: "delete",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            closeModal();
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting calendar's todo:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in onDeleteHandler function:", error);
+    }
   };
 
   return (
@@ -140,15 +262,19 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
               >
                 <TextInput
                   placeholder="할 일"
+                  value={content}
+                  onChangeText={(text) => setContent(text)}
                   style={{
-                    width: 80,
+                    width: content === "" ? 80 : 290,
                     marginRight: 20,
                     fontSize: 14,
                   }}
                 />
-                <Text style={{ fontSize: 11, color: "#FF5154" }}>
-                  * 할 일을 입력해주세요.
-                </Text>
+                {!content && (
+                  <Text style={{ fontSize: 11, color: "#FF5154" }}>
+                    * 할 일을 입력해주세요.
+                  </Text>
+                )}
               </View>
               <Text style={{ marginTop: 24, fontSize: 15, fontWeight: "700" }}>
                 카테고리
@@ -197,6 +323,7 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
             </View>
             <View style={{ marginTop: 30, paddingHorizontal: 29 }}>
               <TouchableOpacity
+                onPress={onSubmitHandler}
                 style={{
                   paddingVertical: 8.5,
                   justifyContent: "center",
@@ -226,7 +353,7 @@ const TodoBottomSheet = ({ visible, setVisible, create, onClose, date }) => {
         visible={deleteBottomSheetVisible}
         setVisible={setDeleteBottomSheetVisible}
         text={"할 일을 삭제하시겠습니까?"}
-        func={() => console.log("delete todo")}
+        func={onDeleteHandler}
       />
     </Modal>
   );
