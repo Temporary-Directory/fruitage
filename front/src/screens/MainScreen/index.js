@@ -11,6 +11,7 @@ import CommitCal from "../../assets/icons/ic_commit-cal.png";
 import Todo from "../../assets/icons/ic_todo.png";
 import TodoUn from "../../assets/icons/ic_todo-un.png";
 import { API_SERVER, USER_API_SERVER } from "../../Config";
+import ProgressBar from "../../components/ProgressBar";
 
 function MainScreen() {
   const [username, setUsername] = useState("username"); // getUsername(); // get username from local storage
@@ -26,7 +27,7 @@ function MainScreen() {
   const getUsername = async () => {
     try {
       const x_auth = await AsyncStorage.getItem("authToken");
-      const url = `${USER_API_SERVER}/?flag=false`;
+      const url = `${USER_API_SERVER}?flag=false`;
 
       await axios({
         method: "get",
@@ -36,6 +37,35 @@ function MainScreen() {
         .then((response) => {
           if (response.status === 200) {
             setUsername(response.data.userName);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user's name:", error);
+        });
+    } catch (error) {
+      // Handle errors related to AsyncStorage or other issues here
+      console.error("Error in getUsername function:", error);
+    }
+  };
+
+  const getToday = async () => {
+    try {
+      const x_auth = await AsyncStorage.getItem("authToken");
+      const url = `${API_SERVER}/today`;
+      console.log("yo", url);
+
+      await axios({
+        method: "get",
+        url: url,
+        headers: { Authorization: `Bearer ${x_auth}` },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            console.log(response.data);
+            const newFruit = response.data.newFruit;
+            const todayStatus = response.data.todayStatus;
+            setLevel(todayStatus.fruitName);
+            setScore(30 - todayStatus.userFruitGauge);
           }
         })
         .catch((error) => {
@@ -95,6 +125,7 @@ function MainScreen() {
 
   useEffect(() => {
     getUsername();
+    getToday();
     getTodayCommit();
     getTodayTodo();
   }, []);
@@ -140,9 +171,11 @@ function MainScreen() {
             }}
           >
             <Text style={{ fontSize: 12 }}>현재과일:</Text>
-            <Text style={{ fontSize: 12, color: "#B66FFF" }}>{level}</Text>
+            <Text style={{ fontSize: 12, color: "#B66FFF", fontWeight: 600 }}>
+              {level}
+            </Text>
           </View>
-          <View style={styles.statusBar}></View>
+          <ProgressBar score={score} />
           <View
             style={{
               flexDirection: "row",
@@ -351,15 +384,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 19,
     paddingVertical: 17,
   },
-  statusBar: {
-    width: 300,
-    height: 12,
-    marginTop: 8,
-    marginBottom: 6,
-    borderRadius: 90,
-    backgroundColor: "#292929",
-  },
-
   dailyState: {
     width: "100%",
     flexDirection: "row",
