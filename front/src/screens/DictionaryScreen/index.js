@@ -17,7 +17,6 @@ import { AntDesign, MaterialIcons, FontAwesome6 } from "@expo/vector-icons";
 
 import { USER_API_SERVER } from "../../Config";
 
-import MangoSteen from "../../assets/images/fruits/mangosteen.png";
 import Close3 from "../../assets/images/ic_close_333.png";
 import Edit3 from "../../assets/images/ic_edit_333.png";
 import Save3 from "../../assets/images/ic_save_333.png";

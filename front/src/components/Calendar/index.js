@@ -7,12 +7,9 @@ import { useEffect, useState } from "react";
 import { CALENDAR_API_SERVER } from "../../Config";
 
 import ToggleSwitch from "../ToggleSwitch";
-import Blueberry from "../../assets/images/fruits/blueberry.png";
+import Empty from "../../assets/images/fruits/empty.png";
 import Left from "../../assets/images/ic_left.png";
 import Right from "../../assets/images/ic_right.png";
-
-const empty =
-  "https://firebasestorage.googleapis.com/v0/b/fruitage-fd177.appspot.com/o/fruit%2Fempty.png?alt=media";
 
 const Calendar = ({
   mode,
@@ -169,11 +166,13 @@ const Calendar = ({
                   width: 38,
                   height: 38,
                 }}
-                source={{
-                  uri: days[date.getDate()]
-                    ? fruitImageURLs[fIndex % fruitImageURLs.length]
-                    : empty,
-                }} // 받아온 정보로 source만 변경
+                source={
+                  days[date.getDate()]
+                    ? {
+                        uri: fruitImageURLs[fIndex % fruitImageURLs.length],
+                      }
+                    : Empty
+                } // 받아온 정보로 source만 변경
               />
             </TouchableOpacity>
           );
